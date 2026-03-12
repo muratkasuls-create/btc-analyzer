@@ -1698,6 +1698,7 @@ function runSimStep(price, bullProb) {
       simPositionPct = positionPct;
       simTrailingHigh = price;
       simPartialTaken = false;
+      // Note: simBalance stays the same - we track position separately
       addTradeLog('▲ AL', price, useAmount, now, null, entryReason);
     }
 
@@ -1713,9 +1714,11 @@ function runSimStep(price, bullProb) {
     if (!simPartialTaken && pnlPct >= 1.0) {
       const halfBtc = simBtcHeld * 0.5;
       const halfVal = halfBtc * price;
-      const halfPnl = halfBtc * (price - simEntryPrice);
+      const halfCost = halfBtc * simEntryPrice;
+      const halfPnl = halfVal - halfCost;
       simBtcHeld -= halfBtc;
-      simBalance += halfVal;
+      // Add profit from partial sell to balance
+      simBalance = simBalance - halfCost + halfVal;
       simPartialTaken = true;
       addTradeLog('◑ KISMİ SAT', price, halfVal, now, halfPnl, '%50 KAR ALINDI');
     }
@@ -1763,8 +1766,10 @@ function runSimStep(price, bullProb) {
 
 function _forceClosePosition(price, now, reason) {
   const saleVal = simBtcHeld * price;
-  const tradePnl = simBtcHeld * (price - simEntryPrice);
-  simBalance += saleVal;
+  const costBasis = simBtcHeld * simEntryPrice;
+  const tradePnl = saleVal - costBasis;
+  // Remove cost basis from balance, add sale value
+  simBalance = simBalance - costBasis + saleVal;
   if (tradePnl > 0) { simWins++; simConsecLosses = 0; }
   else { simLosses++; simConsecLosses++; }
   simTradeCount++;
@@ -1779,9 +1784,19 @@ function _forceClosePosition(price, now, reason) {
 
 function updateSimUI() {
   if (!simRunning && simHistory.length === 0) return;
-  const totalVal = simPosition && currentPrice
-    ? (simBalance * 0.05 + simBtcHeld * currentPrice)
-    : simBalance;
+
+  // Total value = available cash + open position value
+  let totalVal;
+  if (simPosition && currentPrice && simBtcHeld > 0) {
+    // Cash remaining (not invested) + current BTC value
+    const investedCash = simBtcHeld * simEntryPrice;
+    const remainingCash = simBalance - investedCash;
+    const btcCurrentVal = simBtcHeld * currentPrice;
+    totalVal = remainingCash + btcCurrentVal;
+  } else {
+    totalVal = simBalance;
+  }
+
   const pnl = totalVal - simInitial;
   const pnlPct = (pnl / simInitial) * 100;
   const isPos = pnl >= 0;
