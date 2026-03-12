@@ -1029,6 +1029,15 @@ body::before {
       </div>
 
     </div>
+
+    <!-- Fiyat geçmişi sparkline -->
+    <div class="panel" style="flex:0 0 auto">
+      <div class="panel-title">// FİYAT GEÇMİŞİ</div>
+      <div class="panel-body" style="padding:4px">
+        <canvas id="sparklineCanvas"></canvas>
+      </div>
+    </div>
+
   </div>
 
   <!-- ── RIGHT COLUMN ─────────────────────────────────────── -->
@@ -1094,14 +1103,6 @@ body::before {
 
   <!-- ── BOT COLUMN ──────────────────────────────────────── -->
   <div class="col-bot">
-
-    <!-- Fiyat geçmişi sparkline -->
-    <div class="panel" style="flex:0 0 auto">
-      <div class="panel-title">// FİYAT GEÇMİŞİ</div>
-      <div class="panel-body" style="padding:4px">
-        <canvas id="sparklineCanvas"></canvas>
-      </div>
-    </div>
 
     <!-- Multi-Timeframe Analysis + Tavsiye -->
     <div class="panel" style="flex:0 0 auto">
@@ -1805,6 +1806,7 @@ function toggleSim() {
 
 function startSim() {
   if (simRunning) return;
+  try {
   const amt = parseFloat(document.getElementById('simAmount').value);
   if (!amt || amt < 10) { alert('Lütfen geçerli bir tutar girin (min $10)'); return; }
   if (!simSelectedDur) simSelectedDur = 15; // default 15 min
@@ -1835,6 +1837,11 @@ function startSim() {
   clearInterval(simTimerInterval);
   simTimerInterval = setInterval(updateSimTimer, 1000);
   updateSimTimer();
+  } catch(e) {
+    console.error('startSim error:', e);
+    alert('Bot başlatma hatası: ' + e.message);
+    simRunning = false;
+  }
 }
 
 function updateSimTimer() {
@@ -1955,6 +1962,7 @@ let simPriceBuffer = [];        // fiyat momentum için buffer
 
 function runSimStep(price, bullProb) {
   if (!simRunning) return;
+  try {
   const now = new Date().toLocaleTimeString('tr-TR');
   const nowMs = Date.now();
 
@@ -2106,6 +2114,7 @@ function runSimStep(price, bullProb) {
   simHistory.push(tv);
   if (simHistory.length > 500) simHistory.shift();
   updateSimUI();
+  } catch(e) { console.error("runSimStep err:", e); }
 }
 
 function _forceClosePosition(price, now, reason) {
@@ -2277,43 +2286,46 @@ async
 function calcSupportResistance(klines, currentPrice) {
   if (!klines || klines.length < 5) return { resistance: [], support: [] };
   const resistance = [], support = [];
-  const bucket = currentPrice * 0.003; // tighter buckets = more levels
 
-  const addLevel = (price, arr, isRes) => {
-    if (!price || !isFinite(price)) return;
-    const rounded = Math.round(price / bucket) * bucket;
-    const list = isRes ? resistance : support;
-    const condition = isRes ? rounded > currentPrice * 1.001 : rounded < currentPrice * 0.999;
-    if (condition && !list.find(x => Math.abs(x - rounded) < bucket * 1.5))
-      list.push(rounded);
-  };
-
-  // 1. Swing highs/lows (lookahead 1)
-  for (let i = 1; i < klines.length - 1; i++) {
-    if (klines[i].high >= klines[i-1].high && klines[i].high >= klines[i+1].high)
-      addLevel(klines[i].high, resistance, true);
-    if (klines[i].low <= klines[i-1].low && klines[i].low <= klines[i+1].low)
-      addLevel(klines[i].low, support, false);
+  // 1. Round number levels (always reliable)
+  const step = currentPrice < 30000 ? 500 : 1000;
+  for (let i = 1; i <= 5; i++) {
+    const lvl = Math.round(currentPrice / step) * step + (step * i);
+    if (lvl > currentPrice) resistance.push(lvl);
+  }
+  for (let i = 1; i <= 5; i++) {
+    const lvl = Math.round(currentPrice / step) * step - (step * i);
+    if (lvl > 0 && lvl < currentPrice) support.push(lvl);
   }
 
-  // 2. Round number levels (psychological)
-  const roundStep = currentPrice < 10000 ? 100 : currentPrice < 50000 ? 500 : 1000;
-  for (let p = Math.ceil(currentPrice / roundStep) * roundStep; p <= currentPrice * 1.05; p += roundStep)
-    addLevel(p, resistance, true);
-  for (let p = Math.floor(currentPrice / roundStep) * roundStep; p >= currentPrice * 0.95; p -= roundStep)
-    addLevel(p, support, false);
+  // 2. Recent swing highs (last 48 candles)
+  const recent = klines.slice(-48);
+  const bucket = currentPrice * 0.003;
+  for (let i = 1; i < recent.length - 1; i++) {
+    const h = recent[i].high;
+    if (h > recent[i-1].high && h > recent[i+1].high && h > currentPrice) {
+      if (!resistance.find(r => Math.abs(r - h) < bucket)) resistance.push(h);
+    }
+    const l = recent[i].low;
+    if (l < recent[i-1].low && l < recent[i+1].low && l < currentPrice) {
+      if (!support.find(s => Math.abs(s - l) < bucket)) support.push(l);
+    }
+  }
 
-  // 3. Recent high/low of last 24 candles
-  const recent = klines.slice(-24);
-  addLevel(Math.max(...recent.map(k=>k.high)), resistance, true);
-  addLevel(Math.min(...recent.map(k=>k.low)), support, false);
+  // 3. Always ensure we have levels
+  if (resistance.length === 0) {
+    resistance.push(currentPrice * 1.01, currentPrice * 1.02, currentPrice * 1.03);
+  }
+  if (support.length === 0) {
+    support.push(currentPrice * 0.99, currentPrice * 0.98, currentPrice * 0.97);
+  }
 
   resistance.sort((a, b) => a - b);
   support.sort((a, b) => b - a);
   return { resistance: resistance.slice(0, 4), support: support.slice(0, 4) };
 }
 
-// ─── FIBONACCI ───────────────────────────────────────────────────────────────
+
 function calcFibonacci(klines, currentPrice) {
   if (!klines || klines.length < 5) return [];
   const highs  = klines.map(k => k.high);
