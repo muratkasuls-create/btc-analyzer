@@ -1759,7 +1759,7 @@ let simDurationMs = 15 * 60 * 1000; // default 15 min
 let simDurationLabel = '15 DAKİKA';
 let simEndTime = null;
 let simTimerInterval = null;
-let simSelectedDur = null;
+let simSelectedDur = 15; // default 15 min
 
 function setAmt(v) { document.getElementById('simAmount').value = v; }
 
@@ -1780,11 +1780,24 @@ function setDur(minutes, label) {
   simSelectedDur = minutes;
 }
 
+function toggleSim() {
+  if (simRunning) {
+    // Stop
+    simRunning = false;
+    clearInterval(simTimerInterval);
+    document.getElementById('simStartBtn').textContent = '▶ BAŞLAT';
+    document.getElementById('simStatusBadge').textContent = 'DURDURULDU';
+    document.getElementById('simStatusBadge').style.color = 'var(--yellow)';
+  } else {
+    startSim();
+  }
+}
+
 function startSim() {
   if (simRunning) return;
   const amt = parseFloat(document.getElementById('simAmount').value);
   if (!amt || amt < 10) { alert('Lütfen geçerli bir tutar girin (min $10)'); return; }
-  if (!simSelectedDur) { alert('Lütfen bir süre seçin'); return; }
+  if (!simSelectedDur) simSelectedDur = 15; // default 15 min
 
   simInitial = amt;
   simBalance = amt;
@@ -2586,7 +2599,9 @@ function setSimAmount(val) {
 }
 
 function setSimTime(minutes, label) {
-  simDurationMinutes = minutes;
+  simDurationMs = minutes * 60 * 1000;
+  simDurationLabel = label;
+  simSelectedDur = minutes;
   document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
 }
