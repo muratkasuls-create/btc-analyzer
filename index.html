@@ -703,6 +703,38 @@ body::before {
   .header-stats { display:none; }
   #price { font-size:20px; }
 }
+
+  .mtf-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+  .mtf-card.bull { border-color: rgba(0,255,136,0.4); background: rgba(0,255,136,0.05); }
+  .mtf-card.bear { border-color: rgba(255,51,102,0.4); background: rgba(255,51,102,0.05); }
+  .mtf-card.neutral { border-color: rgba(255,215,0,0.3); }
+  .mtf-tf     { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--dim); margin-bottom:3px; }
+  .mtf-signal { font-family:'Orbitron',monospace; font-size:12px; font-weight:700; margin-bottom:2px; }
+  .mtf-rsi    { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--dim); }
+  .mtf-trend  { font-family:'Share Tech Mono',monospace; font-size:9px; margin-top:2px; }
+
+  .advice-log-item {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:3px 6px;
+    border-radius:4px;
+    margin-bottom:2px;
+    font-family:'Share Tech Mono',monospace;
+    font-size:9px;
+    border-left:2px solid;
+  }
+  .advice-log-item.buy  { background:rgba(0,255,136,0.04); border-color:var(--green); }
+  .advice-log-item.sell { background:rgba(255,51,102,0.04); border-color:var(--red); }
+  .advice-log-item.wait { background:rgba(255,215,0,0.04); border-color:var(--yellow); }
+
 </style>
 </head>
 <body>
@@ -968,6 +1000,61 @@ body::before {
       </div>
     </div>
 
+
+    <!-- Multi-Timeframe Analysis + Tavsiye -->
+    <div class="panel" style="flex:0 0 auto">
+      <div class="panel-title">// ÇOK ZAMANLI ANALİZ & TAVSİYE</div>
+      <div class="panel-body" style="padding:6px 8px">
+
+        <!-- 3 Timeframe Cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:8px">
+          <div class="mtf-card" id="mtf-15">
+            <div class="mtf-tf">15D</div>
+            <div class="mtf-signal" id="mtf-15-sig">--</div>
+            <div class="mtf-rsi" id="mtf-15-rsi">RSI: --</div>
+            <div class="mtf-trend" id="mtf-15-trend">--</div>
+          </div>
+          <div class="mtf-card" id="mtf-60">
+            <div class="mtf-tf">1S</div>
+            <div class="mtf-signal" id="mtf-60-sig">--</div>
+            <div class="mtf-rsi" id="mtf-60-rsi">RSI: --</div>
+            <div class="mtf-trend" id="mtf-60-trend">--</div>
+          </div>
+          <div class="mtf-card" id="mtf-240">
+            <div class="mtf-tf">4S</div>
+            <div class="mtf-signal" id="mtf-240-sig">--</div>
+            <div class="mtf-rsi" id="mtf-240-rsi">RSI: --</div>
+            <div class="mtf-trend" id="mtf-240-trend">--</div>
+          </div>
+        </div>
+
+        <!-- AI Tavsiye Kutusu -->
+        <div id="adviceBox" style="
+          background:rgba(0,212,255,0.05);
+          border:1px solid rgba(0,212,255,0.2);
+          border-radius:8px;
+          padding:8px 10px;
+          margin-bottom:6px;
+        ">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--blue)">⚡ TAVSİYE</span>
+            <span id="adviceBadge" style="font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px">---</span>
+          </div>
+          <div id="adviceText" style="font-size:11px;color:var(--text);line-height:1.5;font-family:'Share Tech Mono',monospace">
+            Analiz bekleniyor...
+          </div>
+          <div id="adviceEntry" style="margin-top:4px;font-size:10px;color:var(--dim);font-family:'Share Tech Mono',monospace"></div>
+          <div id="adviceTarget" style="font-size:10px;font-family:'Share Tech Mono',monospace"></div>
+          <div id="adviceStop" style="font-size:10px;font-family:'Share Tech Mono',monospace"></div>
+        </div>
+
+        <!-- Tavsiye Logu -->
+        <div style="font-size:9px;letter-spacing:1px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:4px">// TAVSİYE LOGU</div>
+        <div id="adviceLog" style="max-height:80px;overflow-y:auto;scrollbar-width:thin"></div>
+
+      </div>
+    </div>
+
     <!-- Simülasyon -->
     <div class="panel" style="flex:1;min-height:0">
       <div class="panel-title">// SİMÜLASYON BOTU <span id="simStatusBadge" style="float:right;color:var(--dim)">BEKLEMEDE</span></div>
@@ -1084,7 +1171,7 @@ async function fetchLongShort() {
     const fund = Array.isArray(fundData) ? fundData[0] : fundData;
     const funding = parseFloat(fund?.fundingRate || 0) * 100;
     const oi = parseFloat(oiData.openInterest);
-    return { longPct, shortPct, ratio, funding, oi };
+    const result = { longPct, shortPct, ratio, funding, oi }; window._lastLsData = result; return result;
   } catch(e) { console.warn('fetchLongShort error:', e); return null; }
 }
 
@@ -1736,19 +1823,42 @@ function runSimStep(price, bullProb) {
   // ── POZİSYON YOKSA: Giriş sinyali ara ──────────────────────────────────
   if (!simPosition) {
 
-    // Sinyal gücüne göre pozisyon büyüklüğü belirle
+    // MTF tavsiyesini kullan (varsa), yoksa bullProb'a bak
     let positionPct = 0;
     let entryReason = '';
+    const mtfAdv = window._mtfAdvice;
+    const tfs = window._mtfTFs;
 
-    if (bullProb >= 75 && priceMomentum > 0.1) {
-      positionPct = 0.90; // Çok güçlü sinyal → %90 sermaye
-      entryReason = 'GÜÇLÜ SİNYAL';
-    } else if (bullProb >= 65 && priceMomentum >= 0) {
-      positionPct = 0.65; // Orta güçlü → %65
-      entryReason = 'ORTA SİNYAL';
-    } else if (bullProb >= 58 && priceMomentum > 0.05) {
-      positionPct = 0.40; // Zayıf sinyal → %40
-      entryReason = 'ZAYIF SİNYAL';
+    // MTF tabanlı giriş
+    if (mtfAdv && tfs) {
+      const { action, bullCount } = mtfAdv;
+      const tfsBull = tfs.tf15 && tfs.tf60 && tfs.tf240;
+
+      if (action === 'GÜÇLÜ ALIM' && bullCount >= 3 && priceMomentum >= 0) {
+        positionPct = 0.85;
+        entryReason = '3TF BOĞA';
+      } else if (action === 'ALIM' && bullCount >= 2 && bullProb >= 58) {
+        positionPct = 0.60;
+        entryReason = '2TF BOĞA';
+      } else if (bullProb >= 70 && priceMomentum > 0.1) {
+        positionPct = 0.50;
+        entryReason = 'GÜÇLÜ SİNYAL';
+      } else if (bullProb >= 60 && priceMomentum >= 0) {
+        positionPct = 0.35;
+        entryReason = 'ORTA SİNYAL';
+      }
+    } else {
+      // Fallback: sadece bullProb kullan
+      if (bullProb >= 75 && priceMomentum > 0.1) {
+        positionPct = 0.85;
+        entryReason = 'GÜÇLÜ SİNYAL';
+      } else if (bullProb >= 65 && priceMomentum >= 0) {
+        positionPct = 0.60;
+        entryReason = 'ORTA SİNYAL';
+      } else if (bullProb >= 58 && priceMomentum > 0.05) {
+        positionPct = 0.35;
+        entryReason = 'ZAYIF SİNYAL';
+      }
     }
 
     if (positionPct > 0) {
@@ -1803,10 +1913,14 @@ function runSimStep(price, bullProb) {
       shouldExit = true;
       exitReason = 'TRAİLİNG STOP';
     }
-    // 4. Sinyal tersine döndü
+    // 4. MTF veya sinyal tersine döndü
     else if (bullProb <= 35 && priceMomentum < -0.2) {
       shouldExit = true;
       exitReason = 'SİNYAL TERSİNE DÖNDÜ';
+    }
+    else if (window._mtfAdvice && window._mtfAdvice.action.includes('SATIM') && window._mtfAdvice.bearCount >= 3 && pnlPct < 0.3) {
+      shouldExit = true;
+      exitReason = '3TF AYI ÇIKIŞI';
     }
     // 5. Momentum kaybı (fiyat aşağı gidiyor)
     else if (priceMomentum < -0.5 && pnlPct < 0.2) {
@@ -2339,6 +2453,283 @@ function setSimTime(minutes, label) {
   event.target.classList.add('active');
 }
 
+
+// ─── MULTI-TIMEFRAME ANALYSIS ───────────────────────────────────────────────
+let mtfData = { 15: null, 60: null, 240: null };
+let lastAdvice = null;
+
+async function fetchMTFKlines(interval, limit) {
+  try {
+    const r = await fetch(`https://lucky-sun-d326.muratkasuls.workers.dev?endpoint=klines${interval}`);
+    const d = await r.json();
+    if (!Array.isArray(d)) return null;
+    return d.slice(-limit).map(k => ({
+      open:   parseFloat(k[1]),
+      high:   parseFloat(k[2]),
+      low:    parseFloat(k[3]),
+      close:  parseFloat(k[4]),
+      volume: parseFloat(k[5])
+    }));
+  } catch(e) { return null; }
+}
+
+async function fetchAllMTF() {
+  // Fetch 15m, 1h, 4h directly from Binance via proxy
+  const parse = arr => Array.isArray(arr) ? arr.map(k=>({
+    open:parseFloat(k[1]), high:parseFloat(k[2]),
+    low:parseFloat(k[3]), close:parseFloat(k[4]), volume:parseFloat(k[5])
+  })) : [];
+
+  const results = await Promise.allSettled([
+    fetch(api('klines15m')).then(r=>r.json()),
+    fetch(api('klines1h')).then(r=>r.json()),
+    fetch(api('klines4h')).then(r=>r.json()),
+  ]);
+
+  const k15  = parse(results[0].status === 'fulfilled' ? results[0].value : []);
+  const k60  = parse(results[1].status === 'fulfilled' ? results[1].value : []);
+  const k240 = parse(results[2].status === 'fulfilled' ? results[2].value : []);
+
+  return { k15, k60, k240 };
+}
+
+function analyzeTF(klines, tfName) {
+  if (!klines || klines.length < 14) return null;
+  const closes = klines.map(k=>k.close);
+  const highs  = klines.map(k=>k.high);
+  const lows   = klines.map(k=>k.low);
+
+  const rsi = calcRSI(closes);
+  const { macd } = calcMACD(closes);
+  const momentum = calcMomentum(closes);
+
+  // Trend: EMA20 vs current price
+  const ema20 = closes.slice(-20).reduce((a,b)=>a+b,0) / Math.min(20, closes.length);
+  const price = closes[closes.length-1];
+  const trendBull = price > ema20;
+
+  // Higher High / Lower Low
+  const recent5 = closes.slice(-5);
+  const prev5   = closes.slice(-10,-5);
+  const hhBull  = Math.max(...recent5) > Math.max(...prev5);
+  const llBear  = Math.min(...recent5) < Math.min(...prev5);
+
+  // Score
+  let score = 0;
+  if (rsi < 30) score += 20;
+  else if (rsi < 45) score += 8;
+  else if (rsi > 70) score -= 20;
+  else if (rsi > 55) score -= 8;
+
+  if (macd > 0) score += 10;
+  else score -= 10;
+
+  if (momentum > 0.5) score += 10;
+  else if (momentum < -0.5) score -= 10;
+
+  if (trendBull) score += 15;
+  else score -= 15;
+
+  if (hhBull) score += 8;
+  if (llBear) score -= 8;
+
+  // Candle pattern
+  const pattern = detectCandlePattern(klines);
+  if (pattern.signal === 'bull') score += 12;
+  else if (pattern.signal === 'bear') score -= 12;
+
+  const bullPct = Math.max(10, Math.min(90, 50 + score));
+  const signal = bullPct >= 60 ? 'BOĞA' : bullPct <= 40 ? 'AYI' : 'NÖTR';
+  const signalClass = bullPct >= 60 ? 'bull' : bullPct <= 40 ? 'bear' : 'neutral';
+  const signalColor = bullPct >= 60 ? 'var(--green)' : bullPct <= 40 ? 'var(--red)' : 'var(--yellow)';
+  const trendTxt = trendBull ? '↑ YÜKSELİŞ' : '↓ DÜŞÜŞ';
+
+  return { rsi, macd, momentum, trendBull, bullPct, signal, signalClass, signalColor, trendTxt, pattern, score };
+}
+
+function generateAdvice(tf15, tf60, tf240, currentPrice, lsData) {
+  if (!tf15 || !tf60 || !tf240) return null;
+
+  // Alignment score: how many TFs agree
+  const bullCount = [tf15, tf60, tf240].filter(t => t.bullPct >= 55).length;
+  const bearCount = [tf15, tf60, tf240].filter(t => t.bullPct <= 45).length;
+
+  // Weighted score (4h has most weight)
+  const weightedScore = tf15.score * 0.2 + tf60.score * 0.35 + tf240.score * 0.45;
+
+  // Risk/reward levels
+  const atr = currentPrice * 0.012; // approximate ATR as 1.2% of price
+  const entryPrice = currentPrice;
+  const tp1 = currentPrice * 1.015; // +1.5%
+  const tp2 = currentPrice * 1.030; // +3%
+  const sl  = currentPrice * 0.990; // -1%
+  const tpShort1 = currentPrice * 0.985; // -1.5%
+  const slShort  = currentPrice * 1.010; // +1%
+
+  // Funding rate consideration
+  const funding = lsData ? lsData.funding : 0;
+  const lsRatio = lsData ? lsData.ratio : 1;
+
+  let action, confidence, reasoning, entry, target, stop, badge, badgeColor;
+
+  // STRONG BUY: 3 TF aligned bull + good conditions
+  if (bullCount >= 3 && weightedScore > 25) {
+    action = 'GÜÇLÜ ALIM';
+    confidence = Math.min(95, 65 + weightedScore);
+    badge = '🟢 GÜÇLÜ ALIM';
+    badgeColor = 'rgba(0,255,136,0.2); border:1px solid rgba(0,255,136,0.5); color:var(--green)';
+    entry = `Giriş: $${fmt(entryPrice)}`;
+    target = `🎯 TP1: $${fmt(tp1)} (+1.5%)  TP2: $${fmt(tp2)} (+3%)`;
+    stop   = `🛑 SL: $${fmt(sl)} (-1%)  R/R: 1.5`;
+    reasoning = `15D+1S+4S hepsi YÜKSELİŞ sinyali veriyor. ` +
+      (tf240.rsi < 50 ? `4S RSI ${tf240.rsi.toFixed(0)} — aşırı satım bölgesine yakın. ` : '') +
+      (funding < -0.01 ? 'Negatif funding — shortlar ödüyor, yükseliş lehine. ' : '') +
+      (lsRatio < 0.8 ? 'Short kalabalığı — squeeze riski yüksek.' : 'Momentum güçlü.');
+  }
+  // BUY: 2 TF aligned bull
+  else if (bullCount >= 2 && weightedScore > 10) {
+    action = 'ALIM';
+    confidence = Math.min(80, 55 + weightedScore * 0.5);
+    badge = '🟡 ALIM';
+    badgeColor = 'rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.3); color:var(--green)';
+    entry = `Giriş: $${fmt(entryPrice)}`;
+    target = `🎯 TP1: $${fmt(tp1)} (+1.5%)`;
+    stop   = `🛑 SL: $${fmt(sl)} (-1%)`;
+    reasoning = `${bullCount} zaman dilimi yükseliş sinyali veriyor. ` +
+      (tf60.trendBull ? '1S trend yukarı. ' : '') +
+      (tf240.pattern.signal === 'bull' ? `4S ${tf240.pattern.name} formasyonu. ` : '') +
+      'Dikkatli pozisyon büyüklüğü önerilir.';
+  }
+  // STRONG SELL: 3 TF aligned bear
+  else if (bearCount >= 3 && weightedScore < -25) {
+    action = 'GÜÇLÜ SATIM';
+    confidence = Math.min(95, 65 - weightedScore);
+    badge = '🔴 GÜÇLÜ SATIM';
+    badgeColor = 'rgba(255,51,102,0.2); border:1px solid rgba(255,51,102,0.5); color:var(--red)';
+    entry = `Short Giriş: $${fmt(entryPrice)}`;
+    target = `🎯 TP1: $${fmt(tpShort1)} (-1.5%)`;
+    stop   = `🛑 SL: $${fmt(slShort)} (+1%)`;
+    reasoning = `15D+1S+4S hepsi DÜŞÜŞ sinyali veriyor. ` +
+      (tf240.rsi > 65 ? `4S RSI ${tf240.rsi.toFixed(0)} — aşırı alım. ` : '') +
+      (funding > 0.03 ? 'Yüksek pozitif funding — longlar fazla, düzeltme riski. ' : '') +
+      (lsRatio > 1.5 ? 'Long kalabalığı — squeeze riski.' : 'Satış baskısı hakim.');
+  }
+  // SELL: 2 TF aligned bear
+  else if (bearCount >= 2 && weightedScore < -10) {
+    action = 'SATIM';
+    confidence = Math.min(75, 55 - weightedScore * 0.5);
+    badge = '🟠 SATIM';
+    badgeColor = 'rgba(255,51,102,0.1); border:1px solid rgba(255,51,102,0.3); color:var(--red)';
+    entry = `Short Giriş: $${fmt(entryPrice)}`;
+    target = `🎯 TP: $${fmt(tpShort1)} (-1.5%)`;
+    stop   = `🛑 SL: $${fmt(slShort)} (+1%)`;
+    reasoning = `${bearCount} zaman dilimi düşüş sinyali veriyor. ` +
+      (!tf240.trendBull ? '4S trend aşağı. ' : '') +
+      (tf60.pattern.signal === 'bear' ? `1S ${tf60.pattern.name}. ` : '') +
+      'Pozisyona dikkatli girilmeli.';
+  }
+  // WAIT
+  else {
+    action = 'BEKLE';
+    confidence = 50;
+    badge = '⚪ BEKLE';
+    badgeColor = 'rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); color:var(--yellow)';
+    entry = '';
+    target = '';
+    stop = '';
+    reasoning = `Zaman dilimleri çelişkili sinyal veriyor (${bullCount} boğa / ${bearCount} ayı). ` +
+      'Net bir yön oluşana kadar beklemek daha güvenli. ' +
+      (Math.abs(tf240.rsi - 50) < 10 ? '4S RSI nötr bölgede.' : '');
+  }
+
+  return { action, confidence: confidence.toFixed(0), reasoning, entry, target, stop, badge, badgeColor, bullCount, bearCount, weightedScore };
+}
+
+function renderMTFPanel(tf15, tf60, tf240, advice) {
+  // Update TF cards
+  const cards = [
+    { id: '15',  data: tf15  },
+    { id: '60',  data: tf60  },
+    { id: '240', data: tf240 },
+  ];
+
+  cards.forEach(({id, data}) => {
+    if (!data) return;
+    const card = document.getElementById(`mtf-${id}`);
+    if (card) {
+      card.className = `mtf-card ${data.signalClass}`;
+    }
+    const sigEl = document.getElementById(`mtf-${id}-sig`);
+    if (sigEl) { sigEl.textContent = data.signal; sigEl.style.color = data.signalColor; }
+    const rsiEl = document.getElementById(`mtf-${id}-rsi`);
+    if (rsiEl) rsiEl.textContent = `RSI: ${data.rsi.toFixed(0)}`;
+    const trendEl = document.getElementById(`mtf-${id}-trend`);
+    if (trendEl) { trendEl.textContent = data.trendTxt; trendEl.style.color = data.trendBull ? 'var(--green)' : 'var(--red)'; }
+  });
+
+  // Update advice box
+  if (advice) {
+    const badge = document.getElementById('adviceBadge');
+    if (badge) {
+      badge.textContent = advice.badge;
+      badge.style.cssText = `font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:${advice.badgeColor}`;
+    }
+    const txt = document.getElementById('adviceText');
+    if (txt) txt.textContent = advice.reasoning;
+    const entryEl = document.getElementById('adviceEntry');
+    if (entryEl) { entryEl.textContent = advice.entry; entryEl.style.color = advice.action.includes('SATIM') ? 'var(--red)' : 'var(--green)'; }
+    const targetEl = document.getElementById('adviceTarget');
+    if (targetEl) { targetEl.textContent = advice.target; targetEl.style.color = 'var(--green)'; }
+    const stopEl = document.getElementById('adviceStop');
+    if (stopEl) { stopEl.textContent = advice.stop; stopEl.style.color = 'var(--red)'; }
+
+    // Add to log if advice changed
+    if (!lastAdvice || lastAdvice.action !== advice.action) {
+      addAdviceLog(advice);
+      lastAdvice = advice;
+    }
+  }
+}
+
+function addAdviceLog(advice) {
+  const log = document.getElementById('adviceLog');
+  if (!log) return;
+  const now = new Date().toLocaleTimeString('tr-TR');
+  const cls = advice.action.includes('ALIM') ? 'buy' : advice.action.includes('SATIM') ? 'sell' : 'wait';
+  const div = document.createElement('div');
+  div.className = `advice-log-item ${cls}`;
+  div.innerHTML = `
+    <span style="color:${cls==='buy'?'var(--green)':cls==='sell'?'var(--red)':'var(--yellow)'}; font-weight:700">${advice.action}</span>
+    <span style="color:var(--dim)">%${advice.confidence} güven</span>
+    <span style="color:var(--dim)">${now}</span>
+  `;
+  log.insertBefore(div, log.firstChild);
+  // Keep max 10 items
+  while (log.children.length > 10) log.removeChild(log.lastChild);
+}
+
+async function updateMTFAnalysis() {
+  try {
+    const { k15, k60, k240 } = await fetchAllMTF();
+    const tf15  = k15.length  > 10 ? analyzeTF(k15,  '15D') : null;
+    const tf60  = k60.length  > 10 ? analyzeTF(k60,  '1S')  : null;
+    const tf240 = k240.length > 10 ? analyzeTF(k240, '4S')  : null;
+
+    const lsData = window._lastLsData || null;
+    const advice = generateAdvice(tf15, tf60, tf240, currentPrice || 70000, lsData);
+
+    renderMTFPanel(tf15, tf60, tf240, advice);
+
+    // Update bot with multi-TF advice
+    if (advice) {
+      window._mtfAdvice = advice;
+      window._mtfTFs = { tf15, tf60, tf240 };
+    }
+  } catch(e) { console.warn('MTF update error:', e); }
+  setTimeout(updateMTFAnalysis, 60000); // update every 60s
+}
+
+
 // ─── COUNTDOWN ─────────────────────────────────────────────────────────────
 function startCountdown() {
   countdownVal = 15;
@@ -2578,6 +2969,7 @@ function scheduleUpdate() {
 
 connectWebSocket();
 fullAnalysisUpdate();
+setTimeout(updateMTFAnalysis, 5000); // start MTF after 5s
 </script>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
