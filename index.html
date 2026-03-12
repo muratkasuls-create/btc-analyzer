@@ -981,10 +981,10 @@ let prevPrice = null;
 async function fetchTicker() {
   // Try Binance directly first (has CORS headers)
   const apis = [
-    () => fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT')
+    () => fetch(api('ticker'))
            .then(r=>r.json())
-           .then(d=>({ lastPrice: parseFloat(d.lastPrice), priceChangePercent: parseFloat(d.priceChangePercent), quoteVolume: parseFloat(d.quoteVolume), highPrice: parseFloat(d.highPrice), lowPrice: parseFloat(d.lowPrice) })),
-    () => fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin'))
+           .then(d=> d.lastPrice ? { lastPrice: parseFloat(d.lastPrice), priceChangePercent: parseFloat(d.priceChangePercent), quoteVolume: parseFloat(d.quoteVolume), highPrice: parseFloat(d.highPrice), lowPrice: parseFloat(d.lowPrice) } : { lastPrice: parseFloat(d[0]?.current_price||d.lastPrice), priceChangePercent: parseFloat(d[0]?.price_change_percentage_24h||d.priceChangePercent||0), quoteVolume: parseFloat(d[0]?.total_volume||d.quoteVolume||0), highPrice: parseFloat(d[0]?.high_24h||d.highPrice||0), lowPrice: parseFloat(d[0]?.low_24h||d.lowPrice||0) }),
+    () => fetch(api('ticker'))
            .then(r=>r.json())
            .then(d=>({ lastPrice: d[0].current_price, priceChangePercent: d[0].price_change_percentage_24h, quoteVolume: d[0].total_volume, highPrice: d[0].high_24h, lowPrice: d[0].low_24h })),
     () => fetch('https://api.kraken.com/0/public/Ticker?pair=XBTUSD')
@@ -998,19 +998,22 @@ async function fetchTicker() {
 }
 
 async function fetchOrderBook() {
-  const r = await fetch('https://api.kraken.com/0/public/Depth?pair=XBTUSD&count=8');
+  const r = await fetch(api('depth'));
   const d = await r.json();
-  const book = d.result.XXBTZUSD;
-  return { bids: book.bids, asks: book.asks };
+  // Binance format: { bids: [["price","qty"]], asks: [["price","qty"]] }
+  // Kraken format: { result: { XXBTZUSD: { bids, asks } } }
+  if (d.bids && d.asks) return { bids: d.bids, asks: d.asks };
+  if (d.result) { const b = Object.values(d.result)[0]; return { bids: b.bids, asks: b.asks }; }
+  return { bids: [], asks: [] };
 }
 
 async function fetchLongShort() {
   try {
     // Binance futures long/short ratio (global accounts)
     const [lsRes, fundRes, oiRes] = await Promise.all([
-      fetch('https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=BTCUSDT&period=5m&limit=1'),
-      fetch('https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=1'),
-      fetch('https://fapi.binance.com/fapi/v1/openInterest?symbol=BTCUSDT'),
+      fetch(api('longshort')),
+      fetch(api('funding')),
+      fetch(api('openint')),
     ]);
     const lsData = await lsRes.json();
     const fundData = await fundRes.json();
@@ -1031,14 +1034,18 @@ async function fetchLongShort() {
 }
 
 async function fetchKlines() {
-  const r = await fetch('https://api.kraken.com/0/public/OHLC?pair=XBTUSD&interval=1');
+  const r = await fetch(api('klines1m'));
   const d = await r.json();
-  return d.result.XXBTZUSD.slice(-60).map(k => ({
+  // Binance format: [openTime, open, high, low, close, volume, ...]
+  const klines = Array.isArray(d) ? d : d.result ? Object.values(d.result)[0] : [];
+  return klines.slice(-60).map(k => ({
+    open: parseFloat(k[1]),
+    high: parseFloat(k[2]),
+    low: parseFloat(k[3]),
     close: parseFloat(k[4]),
-    volume: parseFloat(k[6]),
+    volume: parseFloat(k[5])
   }));
 }
-
 // ─── INDICATORS ────────────────────────────────────────────────────────────
 function calcRSI(closes, period = 14) {
   if (closes.length < period + 1) return 50;
@@ -1889,7 +1896,7 @@ function drawPnlChart() {
 // ─── FEAR & GREED INDEX ─────────────────────────────────────────────────────
 async function fetchFearGreed() {
   try {
-    const r = await fetch('https://api.alternative.me/fng/?limit=1');
+    const r = await fetch(api('feargreed'));
     const d = await r.json();
     return parseInt(d.data[0].value);
   } catch(e) { return 50; }
@@ -1908,7 +1915,7 @@ async function fetchCorrelations() {
 
 async function fetchBtcDominance() {
   try {
-    const r = await fetch('https://api.coingecko.com/api/v3/global');
+    const r = await fetch(api('dominance'));
     const d = await r.json();
     return d.data.market_cap_percentage.btc;
   } catch(e) { return null; }
@@ -2253,82 +2260,108 @@ function startCountdown() {
   }, 1000);
 }
 
-// ─── WEBSOCKET REAL-TIME ───────────────────────────────────────────────────
+// ─── PRICE POLLING (Mobile Compatible) ─────────────────────────────────────
 let ws = null;
 let wsReconnectTimer = null;
 let lastFullUpdate = 0;
 let latestWsPrice = null;
+let pricePollingTimer = null;
+
+async function pollPrice() {
+  try {
+    const apis = [
+      () => fetch(api('price')).then(r=>r.json()).then(d=>parseFloat(d.price)),
+      () => fetch('https://api.kraken.com/0/public/Ticker?pair=XBTUSD').then(r=>r.json()).then(d=>parseFloat(d.result.XXBTZUSD.c[0])),
+      () => fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')).then(r=>r.json()).then(d=>parseFloat(d.price)),
+    ];
+    
+    let price = null;
+    for (const api of apis) {
+      try { price = await api(); if (price) break; } catch(e) { continue; }
+    }
+    
+    if (!price) return;
+    
+    latestWsPrice = price;
+    prevPrice = currentPrice;
+    currentPrice = price;
+    
+    const priceEl = document.getElementById('price');
+    priceEl.textContent = '$' + fmt(price);
+    priceEl.classList.add('flash');
+    setTimeout(() => priceEl.classList.remove('flash'), 200);
+    if (prevPrice !== null) {
+      priceEl.style.color = price > prevPrice ? 'var(--green)' : price < prevPrice ? 'var(--red)' : '#fff';
+    }
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('tr-TR');
+    
+    priceHistory.push(price);
+    if (priceHistory.length > 50) priceHistory.shift();
+    drawSparkline(priceHistory);
+    
+    if (window._lastProbs) runSimStep(price, window._lastProbs.bull);
+    
+  } catch(e) { console.warn('Price poll error:', e); }
+  
+  pricePollingTimer = setTimeout(pollPrice, 3000); // Poll every 3 seconds
+}
 
 function connectWebSocket() {
-  if (ws) { try { ws.close(); } catch(_) {} }
+  // Try WebSocket first, fall back to polling
   try {
     ws = new WebSocket('wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/btcusdt@depth5@100ms');
     ws.onopen = () => {
       console.log('WS connected');
       document.getElementById('countdown').textContent = 'CANLI';
       document.getElementById('countdown').style.color = 'var(--green)';
+      clearTimeout(pricePollingTimer); // stop polling if WS works
     };
     ws.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);
         if (!msg.data) return;
         const stream = msg.stream;
-
         if (stream.includes('@ticker')) {
           const t = msg.data;
           const price = parseFloat(t.c);
-          const change24 = parseFloat(t.P);
-          const high24 = parseFloat(t.h);
-          const low24 = parseFloat(t.l);
-          const vol24 = parseFloat(t.q);
-
           latestWsPrice = price;
-
-          // Update price display instantly
-          const priceEl = document.getElementById('price');
           prevPrice = currentPrice;
           currentPrice = price;
+          const priceEl = document.getElementById('price');
           priceEl.textContent = '$' + fmt(price);
           priceEl.classList.add('flash');
           setTimeout(() => priceEl.classList.remove('flash'), 200);
           if (prevPrice !== null) {
             priceEl.style.color = price > prevPrice ? 'var(--green)' : price < prevPrice ? 'var(--red)' : '#fff';
           }
-
-          const changeEl = document.getElementById('change24h');
-          changeEl.textContent = (change24 >= 0 ? '+' : '') + change24.toFixed(2) + '%';
-          changeEl.className = 'price-change ' + (change24 >= 0 ? 'up' : 'down');
-
-          document.getElementById('high24h').textContent = '$' + fmt(high24);
-          document.getElementById('low24h').textContent = '$' + fmt(low24);
-          document.getElementById('volume').textContent = '$' + fmtVol(vol24);
+          const change24 = parseFloat(t.P);
+          document.getElementById('change24h').textContent = (change24 >= 0 ? '+' : '') + change24.toFixed(2) + '%';
+          document.getElementById('change24h').className = 'price-change ' + (change24 >= 0 ? 'up' : 'down');
+          document.getElementById('high24h').textContent = '$' + fmt(parseFloat(t.h));
+          document.getElementById('low24h').textContent = '$' + fmt(parseFloat(t.l));
+          document.getElementById('volume').textContent = '$' + fmtVol(parseFloat(t.q));
           document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('tr-TR');
-
-          // Price history
           priceHistory.push(price);
           if (priceHistory.length > 50) priceHistory.shift();
           drawSparkline(priceHistory);
-
-          // Run sim step on every tick
           if (window._lastProbs) runSimStep(price, window._lastProbs.bull);
         }
-
         if (stream.includes('@depth')) {
           const ob = msg.data;
           if (ob.bids && ob.asks) renderOrderBook(ob.bids, ob.asks);
         }
-
       } catch(err) { console.error('WS parse error', err); }
     };
-    ws.onerror = () => console.warn('WS error');
+    ws.onerror = () => { console.warn('WS error, switching to polling'); pollPrice(); };
     ws.onclose = () => {
-      document.getElementById('countdown').textContent = 'YENİDEN BAĞLANIYOR...';
+      document.getElementById('countdown').textContent = '3s';
       document.getElementById('countdown').style.color = 'var(--yellow)';
-      wsReconnectTimer = setTimeout(connectWebSocket, 3000);
+      pollPrice(); // Fall back to polling
+      wsReconnectTimer = setTimeout(connectWebSocket, 30000); // retry WS after 30s
     };
   } catch(e) {
-    console.warn('WS failed, falling back to polling');
-    schedulePolling();
+    console.warn('WS not available, using polling');
+    pollPrice();
   }
 }
 
@@ -2404,7 +2437,7 @@ async function fullAnalysisUpdate() {
     renderFearGreed(fgVal);
 
     // Support/Resistance & Fibonacci (use extended klines)
-    const extKlines = await fetch('https://api.kraken.com/0/public/OHLC?pair=XBTUSD&interval=60')
+    const extKlines = await fetch(api('klines1h'))
       .then(r=>r.json())
       .then(d=>d.result.XXBTZUSD.slice(-100).map(k=>({
         open:parseFloat(k[1]),high:parseFloat(k[2]),low:parseFloat(k[3]),
