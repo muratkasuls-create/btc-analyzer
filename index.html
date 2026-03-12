@@ -1451,7 +1451,8 @@ async function update() {
     runSimStep(price, probs.bull);
 
     // Hide loading
-    document.getElementById('loading').style.display = 'none';
+    const loadingEl = document.getElementById('loading');
+    if (loadingEl) loadingEl.style.display = 'none';
 
   } catch (err) {
     console.error('Veri çekme hatası:', err);
@@ -2472,7 +2473,8 @@ async function fullAnalysisUpdate() {
     document.getElementById('bearBar').style.width = finalBear + '%';
     window._lastProbs = { ...probs, bull: finalBull, bear: finalBear };
 
-    document.getElementById('loading').style.display = 'none';
+    const loadingEl = document.getElementById('loading');
+    if (loadingEl) loadingEl.style.display = 'none';
 
   } catch(err) {
     console.error('Analysis update error:', err);
@@ -2495,6 +2497,30 @@ function scheduleUpdate() {
 }
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
+
+// Force hide loading after 5s no matter what (mobile fallback)
+setTimeout(() => {
+  const l = document.getElementById('loading');
+  if (l) l.style.display = 'none';
+}, 5000);
+
+// Also hide loading as soon as first price arrives
+async function initLoad() {
+  try {
+    const r = await fetch(api('price'));
+    const d = await r.json();
+    if (d.price) {
+      currentPrice = parseFloat(d.price);
+      document.getElementById('price').textContent = '$' + fmt(currentPrice);
+      document.getElementById('loading').style.display = 'none';
+    }
+  } catch(e) {
+    console.warn('Init price fetch failed:', e);
+  }
+  document.getElementById('loading').style.display = 'none';
+}
+
+initLoad();
 connectWebSocket();
 fullAnalysisUpdate();
 </script>
