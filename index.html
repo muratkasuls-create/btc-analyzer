@@ -705,6 +705,159 @@
     </div>
   </div>
 
+  <!-- Long/Short Panel -->
+  <div class="signal-panel" style="margin-bottom:20px">
+    <div class="signal-header">
+      <span class="signal-title">// LONG / SHORT POZİSYONLARI</span>
+      <span id="lsBadge" class="signal-badge neutral">YÜKLENİYOR</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div style="background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:10px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:8px">▲ LONG</div>
+        <div id="longPct" style="font-size:36px;font-weight:700;font-family:'Share Tech Mono',monospace;color:var(--green)">--%</div>
+        <div id="longSize" style="font-size:12px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-top:4px">$---</div>
+      </div>
+      <div style="background:rgba(255,51,102,0.05);border:1px solid rgba(255,51,102,0.2);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:10px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:8px">▼ SHORT</div>
+        <div id="shortPct" style="font-size:36px;font-weight:700;font-family:'Share Tech Mono',monospace;color:var(--red)">--%</div>
+        <div id="shortSize" style="font-size:12px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-top:4px">$---</div>
+      </div>
+    </div>
+
+    <!-- L/S Bar -->
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:10px;font-family:'Share Tech Mono',monospace;color:var(--dim);margin-bottom:6px">
+        <span>LONG BASKI</span>
+        <span>SHORT BASKI</span>
+      </div>
+      <div style="height:10px;background:rgba(255,51,102,0.3);border-radius:5px;overflow:hidden">
+        <div id="lsBar" style="height:100%;background:linear-gradient(90deg,var(--green),#00cc66);border-radius:5px;width:50%;transition:width 1s ease"></div>
+      </div>
+    </div>
+
+    <!-- Extra stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:6px">FUNDING RATE</div>
+        <div id="fundingRate" style="font-size:16px;font-weight:700;font-family:'Share Tech Mono',monospace;color:var(--yellow)">--%</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:6px">AÇIK POZİSYON</div>
+        <div id="openInterest" style="font-size:16px;font-weight:700;font-family:'Share Tech Mono',monospace;color:var(--blue)">---</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:6px">L/S ORAN</div>
+        <div id="lsRatio" style="font-size:16px;font-weight:700;font-family:'Share Tech Mono',monospace">---</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Fear & Greed + On-Chain Panel -->
+  <div class="signal-panel" style="margin-bottom:20px">
+    <div class="signal-header">
+      <span class="signal-title">// DUYGU & ON-CHAIN ANALİZİ</span>
+      <span id="fgBadge" class="signal-badge neutral">YÜKLENİYOR</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px">
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:8px">KORKU & AÇGÖZLÜLÜK</div>
+        <div id="fgValue" style="font-size:44px;font-weight:700;font-family:'Share Tech Mono',monospace">--</div>
+        <div id="fgLabel" style="font-size:12px;letter-spacing:1px;margin-top:4px;font-family:'Share Tech Mono',monospace">---</div>
+        <div style="height:6px;background:linear-gradient(90deg,#ff3366,#ffd700,#00ff88);border-radius:3px;margin-top:10px;position:relative">
+          <div id="fgMarker" style="position:absolute;top:-3px;width:12px;height:12px;background:#fff;border-radius:50%;transform:translateX(-50%);left:50%;transition:left 1s ease"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-top:4px">
+          <span>KORKU</span><span>NÖTR</span><span>AÇGÖZLÜLÜK</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-rows:1fr 1fr;gap:8px">
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:12px">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:4px">EXCHANGE AKIŞI</div>
+          <div id="exchangeFlow" style="font-size:15px;font-weight:700;font-family:'Share Tech Mono',monospace">---</div>
+          <div id="exchangeFlowNote" style="font-size:10px;color:var(--dim);margin-top:2px">BTC borsa girişi/çıkışı</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:12px">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:4px">WHALE HAREKETİ</div>
+          <div id="whaleActivity" style="font-size:15px;font-weight:700;font-family:'Share Tech Mono',monospace">---</div>
+          <div id="whaleNote" style="font-size:10px;color:var(--dim);margin-top:2px">Büyük cüzdan transferi</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Support/Resistance + Fibonacci -->
+  <div class="signal-panel" style="margin-bottom:20px">
+    <div class="signal-header">
+      <span class="signal-title">// DESTEK / DİRENÇ & FİBONACCİ</span>
+      <span id="srBadge" class="signal-badge neutral">---</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div>
+        <div style="font-size:9px;letter-spacing:2px;color:var(--red);font-family:'Share Tech Mono',monospace;margin-bottom:8px">▲ DİRENÇ SEVİYELERİ</div>
+        <div id="resistanceLevels"></div>
+      </div>
+      <div>
+        <div style="font-size:9px;letter-spacing:2px;color:var(--green);font-family:'Share Tech Mono',monospace;margin-bottom:8px">▼ DESTEK SEVİYELERİ</div>
+        <div id="supportLevels"></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:9px;letter-spacing:2px;color:var(--yellow);font-family:'Share Tech Mono',monospace;margin-bottom:8px">📐 FİBONACCİ SEVİYELERİ</div>
+      <div id="fibLevels" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+  </div>
+
+  <!-- Correlations -->
+  <div class="signal-panel" style="margin-bottom:20px">
+    <div class="signal-header">
+      <span class="signal-title">// KORELASYON ANALİZİ</span>
+      <span id="corrBadge" class="signal-badge neutral">YÜKLENİYOR</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:6px">DXY (DOLAR)</div>
+        <div id="dxyVal" style="font-size:20px;font-weight:700;font-family:'Share Tech Mono',monospace">---</div>
+        <div id="dxyNote" style="font-size:10px;color:var(--dim);margin-top:4px">---</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:6px">S&P 500</div>
+        <div id="spxVal" style="font-size:20px;font-weight:700;font-family:'Share Tech Mono',monospace">---</div>
+        <div id="spxNote" style="font-size:10px;color:var(--dim);margin-top:4px">---</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:6px">BTC DOMİNANS</div>
+        <div id="domVal" style="font-size:20px;font-weight:700;font-family:'Share Tech Mono',monospace">---</div>
+        <div id="domNote" style="font-size:10px;color:var(--dim);margin-top:4px">---</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Candle Pattern + Market Structure -->
+  <div class="signal-panel" style="margin-bottom:20px">
+    <div class="signal-header">
+      <span class="signal-title">// MUM FORMASYONU & PİYASA YAPISI</span>
+      <span id="patternBadge" class="signal-badge neutral">---</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <div style="font-size:9px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:8px">MUM FORMASYONU</div>
+        <div id="candlePattern" style="font-size:14px;font-family:'Share Tech Mono',monospace;color:var(--text)">Analiz ediliyor...</div>
+        <div id="candleNote" style="font-size:11px;color:var(--dim);margin-top:6px;line-height:1.5"></div>
+      </div>
+      <div>
+        <div style="font-size:9px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:8px">PİYASA YAPISI</div>
+        <div id="marketStructure" style="font-size:14px;font-family:'Share Tech Mono',monospace;color:var(--text)">Analiz ediliyor...</div>
+        <div id="structureNote" style="font-size:11px;color:var(--dim);margin-top:6px;line-height:1.5"></div>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-size:9px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:8px">LİKİDİTE HAVUZLARI</div>
+      <div id="liquidityPools" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+  </div>
+
   <!-- Sparkline chart -->
   <div class="chart-section">
     <div class="signal-title" style="margin-bottom:14px">// FİYAT GEÇMİŞİ (SON 50 KAYIT)</div>
@@ -839,6 +992,32 @@ async function fetchOrderBook() {
   return { bids: book.bids, asks: book.asks };
 }
 
+async function fetchLongShort() {
+  try {
+    // Binance futures long/short ratio (global accounts)
+    const [lsRes, fundRes, oiRes] = await Promise.all([
+      fetch('https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=BTCUSDT&period=5m&limit=1'),
+      fetch('https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=1'),
+      fetch('https://fapi.binance.com/fapi/v1/openInterest?symbol=BTCUSDT'),
+    ]);
+    const lsData = await lsRes.json();
+    const fundData = await fundRes.json();
+    const oiData = await oiRes.json();
+
+    const ls = lsData[0];
+    const longPct = parseFloat(ls.longAccount) * 100;
+    const shortPct = parseFloat(ls.shortAccount) * 100;
+    const ratio = parseFloat(ls.longShortRatio);
+    const funding = parseFloat(fundData[0]?.fundingRate || 0) * 100;
+    const oi = parseFloat(oiData.openInterest);
+
+    return { longPct, shortPct, ratio, funding, oi };
+  } catch(e) {
+    // Fallback: estimate from order book ratio
+    return null;
+  }
+}
+
 async function fetchKlines() {
   const r = await fetch('https://api.kraken.com/0/public/OHLC?pair=XBTUSD&interval=1');
   const d = await r.json();
@@ -892,44 +1071,94 @@ function analyzeOrderBook(bids, asks) {
 }
 
 // ─── PROBABILITY CALC ─────────────────────────────────────────────────────
-function calcProbability({ rsi, macd, momentum, obRatio, priceChange, volumeRatio }) {
+function calcProbability({ rsi, macd, momentum, obRatio, priceChange, volumeRatio, lsRatio = 1, funding = 0, lsData = null }) {
   let score = 50;
+  let signals = [];
 
-  // RSI
-  if (rsi < 30) score += 15;
-  else if (rsi < 40) score += 8;
-  else if (rsi > 70) score -= 15;
-  else if (rsi > 60) score -= 8;
+  // ── 1. RSI ──────────────────────────────────────────────────────────────
+  if (rsi < 25) { score += 18; signals.push({name:'RSI', note:'AŞIRI SATIM - Geri dönüş beklentisi', bull:true}); }
+  else if (rsi < 35) { score += 10; signals.push({name:'RSI', note:'Oversold bölgesi', bull:true}); }
+  else if (rsi > 75) { score -= 18; signals.push({name:'RSI', note:'AŞIRI ALIM - Düzeltme riski', bull:false}); }
+  else if (rsi > 65) { score -= 10; signals.push({name:'RSI', note:'Overbought bölgesi', bull:false}); }
 
-  // MACD
-  if (macd > 0) score += 10;
-  else score -= 10;
+  // ── 2. MACD ─────────────────────────────────────────────────────────────
+  if (macd > 50) { score += 12; signals.push({name:'MACD', note:'Güçlü pozitif momentum', bull:true}); }
+  else if (macd > 0) { score += 6; signals.push({name:'MACD', note:'Pozitif momentum', bull:true}); }
+  else if (macd < -50) { score -= 12; signals.push({name:'MACD', note:'Güçlü negatif momentum', bull:false}); }
+  else { score -= 6; signals.push({name:'MACD', note:'Negatif momentum', bull:false}); }
 
-  // Momentum
-  if (momentum > 0.5) score += 10;
-  else if (momentum > 0) score += 5;
-  else if (momentum < -0.5) score -= 10;
-  else score -= 5;
+  // ── 3. MOMENTUM ─────────────────────────────────────────────────────────
+  if (momentum > 1.5) { score += 10; }
+  else if (momentum > 0.3) { score += 5; }
+  else if (momentum < -1.5) { score -= 10; }
+  else if (momentum < -0.3) { score -= 5; }
 
-  // Order book
-  if (obRatio > 0.6) score += 12;
-  else if (obRatio > 0.5) score += 6;
-  else if (obRatio < 0.4) score -= 12;
-  else score -= 6;
+  // ── 4. ORDER BOOK BASKISI ────────────────────────────────────────────────
+  if (obRatio > 0.65) { score += 10; signals.push({name:'OB', note:'Güçlü alış baskısı', bull:true}); }
+  else if (obRatio > 0.55) { score += 5; }
+  else if (obRatio < 0.35) { score -= 10; signals.push({name:'OB', note:'Güçlü satış baskısı', bull:false}); }
+  else if (obRatio < 0.45) { score -= 5; }
 
-  // Price change
-  if (priceChange > 0) score += 5;
-  else score -= 5;
+  // ── 5. HACİM ────────────────────────────────────────────────────────────
+  if (volumeRatio > 2.0) { score += 8; signals.push({name:'HACİM', note:'Anormal yüksek hacim - Büyük oyuncu hareketi', bull: momentum > 0}); }
+  else if (volumeRatio > 1.3) { score += 4; }
+  else if (volumeRatio < 0.5) { score -= 6; signals.push({name:'HACİM', note:'Düşük hacim - Zayıf hareket', bull:false}); }
 
-  // Volume
-  if (volumeRatio > 1.2) score += 8;
-  else if (volumeRatio < 0.8) score -= 4;
+  // ── 6. MARKET MAKER / SMART MONEY ANALİZİ ───────────────────────────────
+  // Teori: Kalabalık long → MM short squeeze yapar | Kalabalık short → MM long squeeze yapar
+  if (lsRatio > 1.8) {
+    // Aşırı long kalabalık → MM SHORT SQUEEZE riski
+    score -= 15;
+    signals.push({name:'⚠ MM UYARI', note:'Aşırı long kalabalık! Market maker SHORT squeeze yapabilir', bull:false});
+  } else if (lsRatio > 1.4) {
+    score -= 8;
+    signals.push({name:'MM', note:'Long kalabalığı - Dikkat', bull:false});
+  } else if (lsRatio < 0.6) {
+    // Aşırı short kalabalık → MM LONG SQUEEZE riski
+    score += 15;
+    signals.push({name:'⚠ MM FIRSAT', note:'Aşırı short kalabalık! Market maker LONG squeeze yapabilir', bull:true});
+  } else if (lsRatio < 0.75) {
+    score += 8;
+    signals.push({name:'MM', note:'Short kalabalığı - Yükseliş fırsatı', bull:true});
+  }
 
-  // Add small randomness for realism
-  score += (Math.random() - 0.5) * 4;
+  // ── 7. FUNDING RATE ─────────────────────────────────────────────────────
+  // Pozitif funding = longlar short'lara ödüyor = piyasa aşırı iyimser
+  if (funding > 0.05) {
+    score -= 12;
+    signals.push({name:'FUNDING', note:'Yüksek pozitif funding - Long'lar fazla, düzeltme riski', bull:false});
+  } else if (funding > 0.02) {
+    score -= 6;
+  } else if (funding < -0.05) {
+    score += 12;
+    signals.push({name:'FUNDING', note:'Negatif funding - Short'lar ödüyor, yükseliş sinyali', bull:true});
+  } else if (funding < -0.02) {
+    score += 6;
+  }
 
-  score = Math.max(15, Math.min(85, score));
-  return { bull: Math.round(score), bear: Math.round(100 - score) };
+  // ── 8. TREND (24s) ──────────────────────────────────────────────────────
+  if (priceChange > 3) { score += 8; }
+  else if (priceChange > 1) { score += 4; }
+  else if (priceChange < -3) { score -= 8; }
+  else if (priceChange < -1) { score -= 4; }
+
+  // ── 9. CONTRARIAN EXTREME ───────────────────────────────────────────────
+  // Aşırı tek yönlü piyasa her zaman tersine döner
+  if (rsi > 80 && lsRatio > 1.5 && funding > 0.03) {
+    score -= 20;
+    signals.push({name:'⛔ AŞIRI ALIM', note:'RSI + Long kalabalık + Yüksek funding = Güçlü düşüş sinyali', bull:false});
+  }
+  if (rsi < 20 && lsRatio < 0.7 && funding < -0.03) {
+    score += 20;
+    signals.push({name:'🚀 AŞIRI SATIM', note:'RSI + Short kalabalık + Negatif funding = Güçlü yükseliş sinyali', bull:true});
+  }
+
+  // ── 10. KÜÇÜK RASTGELELİK ───────────────────────────────────────────────
+  score += (Math.random() - 0.5) * 3;
+  score = Math.max(10, Math.min(90, score));
+
+  window._signals = signals;
+  return { bull: Math.round(score), bear: Math.round(100 - score), signals };
 }
 
 // ─── RENDER ────────────────────────────────────────────────────────────────
@@ -976,6 +1205,71 @@ function renderOrderBook(bids, asks) {
       <span style="color:var(--dim)">${parseFloat(b[1]).toFixed(3)}</span>
     </div>`;
   }).join('');
+}
+
+function renderSmartSignals(signals) {
+  if (!signals || signals.length === 0) return;
+  const box = document.getElementById('smartSignals');
+  const list = document.getElementById('signalsList');
+  box.style.display = 'block';
+  list.innerHTML = signals.map(s => `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;
+      background:${s.bull ? 'rgba(0,255,136,0.05)' : 'rgba(255,51,102,0.05)'};
+      border-left:3px solid ${s.bull ? 'var(--green)' : 'var(--red)'};
+      border-radius:0 8px 8px 0">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;
+        color:${s.bull ? 'var(--green)' : 'var(--red)'};white-space:nowrap;min-width:80px">${s.name}</span>
+      <span style="font-size:12px;color:var(--text);line-height:1.4">${s.note}</span>
+    </div>
+  `).join('');
+}
+
+function updateLongShort(data, obRatio) {
+  let longPct, shortPct, ratio;
+
+  if (data) {
+    longPct = data.longPct;
+    shortPct = data.shortPct;
+    ratio = data.ratio;
+
+    const funding = data.funding;
+    document.getElementById('fundingRate').textContent = (funding >= 0 ? '+' : '') + funding.toFixed(4) + '%';
+    document.getElementById('fundingRate').style.color = funding >= 0 ? 'var(--green)' : 'var(--red)';
+
+    const oi = data.oi;
+    document.getElementById('openInterest').textContent = oi > 1e9 ? (oi/1e9).toFixed(2)+'B' : (oi/1e6).toFixed(0)+'M';
+  } else {
+    // Estimate from order book
+    longPct = obRatio * 100;
+    shortPct = (1 - obRatio) * 100;
+    ratio = longPct / shortPct;
+    document.getElementById('fundingRate').textContent = 'N/A';
+    document.getElementById('openInterest').textContent = 'N/A';
+  }
+
+  document.getElementById('longPct').textContent = longPct.toFixed(1) + '%';
+  document.getElementById('shortPct').textContent = shortPct.toFixed(1) + '%';
+  document.getElementById('lsBar').style.width = longPct + '%';
+
+  const ratioEl = document.getElementById('lsRatio');
+  ratioEl.textContent = ratio.toFixed(2);
+  ratioEl.style.color = ratio > 1 ? 'var(--green)' : 'var(--red)';
+
+  // Badge
+  const badge = document.getElementById('lsBadge');
+  if (longPct > 60) { badge.textContent = '▲ LONG AĞIRLIKLI'; badge.className = 'signal-badge bull'; }
+  else if (shortPct > 60) { badge.textContent = '▼ SHORT AĞIRLIKLI'; badge.className = 'signal-badge bear'; }
+  else { badge.textContent = '◈ DENGELİ'; badge.className = 'signal-badge neutral'; }
+
+  // Update long/short sizes if price known
+  if (currentPrice && data && data.oi) {
+    const longVal = (longPct/100) * data.oi * currentPrice;
+    const shortVal = (shortPct/100) * data.oi * currentPrice;
+    document.getElementById('longSize').textContent = '$' + fmtVol(longVal);
+    document.getElementById('shortSize').textContent = '$' + fmtVol(shortVal);
+  }
+
+  return { longPct, shortPct, ratio };
 }
 
 function drawSparkline(prices) {
@@ -1055,7 +1349,9 @@ async function update() {
     const volumeRatio = curVol / avgVol;
 
     // Probabilities
-    const probs = calcProbability({ rsi, macd, momentum, obRatio, priceChange: change24, volumeRatio });
+    const lsRatio = lsInfo ? lsInfo.ratio : 1;
+    const fundingVal = lsData ? lsData.funding : 0;
+    const probs = calcProbability({ rsi, macd, momentum, obRatio, priceChange: change24, volumeRatio, lsRatio, funding: fundingVal });
 
     // ── RENDER ──
     const priceEl = document.getElementById('price');
@@ -1079,6 +1375,7 @@ async function update() {
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('tr-TR');
 
     // Probabilities
+    renderSmartSignals(probs.signals);
     document.getElementById('bullProb').textContent = probs.bull + '%';
     document.getElementById('bearProb').textContent = probs.bear + '%';
     document.getElementById('bullBar').style.width = probs.bull + '%';
@@ -1149,6 +1446,7 @@ let simBalance = 1000;
 let simBtcHeld = 0;
 let simEntryPrice = 0;
 let simTradeCount = 0;
+let simPositionPct = 0;        // pozisyon büyüklüğü oranı
 let simWins = 0;
 let simLosses = 0;
 let simHistory = [];
@@ -1309,33 +1607,155 @@ function resetSim() {
   drawPnlChart();
 }
 
+// ─── PROFESYONEL BOT MANTİĞİ ───────────────────────────────────────────────
+// Dinamik pozisyon yönetimi:
+// - Sinyal gücüne göre sermayenin %20-%95'ini kullanır
+// - Trailing stop: fiyat yukarı gidince stop da yukarı kayar
+// - Partial take profit: %1'de yarısını satar, geri kalanı çalışır
+// - Cooldown: seri kayıptan sonra bekler
+// - Max günlük kayıp: %10 drawdown'da durur
+// - Birden fazla pozisyon değil, tek ama akıllı pozisyon yönetimi
+
+let simTrailingHigh = 0;        // trailing stop için en yüksek fiyat
+let simLastSellTime = 0;        // cooldown timer
+let simCooldownMs = 30000;      // 30sn bekleme seri kayıptan sonra
+let simConsecLosses = 0;        // ardışık kayıp sayısı
+let simDailyDrawdown = 0;       // günlük max kayıp takibi
+let simPartialTaken = false;    // kısmi kar alındı mı
+let simPriceBuffer = [];        // fiyat momentum için buffer
+
 function runSimStep(price, bullProb) {
   if (!simRunning) return;
   const now = new Date().toLocaleTimeString('tr-TR');
+  const nowMs = Date.now();
 
-  if (!simPosition && bullProb >= 62) {
-    simBtcHeld = (simBalance * 0.95) / price;
-    simEntryPrice = price;
-    simPosition = 'long';
-    addTradeLog('AL', price, simBalance * 0.95, now, null);
-  } else if (simPosition === 'long') {
+  // Fiyat buffer'ı güncelle (momentum hesabı için)
+  simPriceBuffer.push(price);
+  if (simPriceBuffer.length > 10) simPriceBuffer.shift();
+  const priceMomentum = simPriceBuffer.length >= 5
+    ? ((price - simPriceBuffer[0]) / simPriceBuffer[0]) * 100
+    : 0;
+
+  // Max drawdown koruması (%10)
+  const totalVal = simPosition ? (simBalance * (1 - simPositionPct) + simBtcHeld * price) : simBalance;
+  const drawdown = ((simInitial - totalVal) / simInitial) * 100;
+  if (drawdown >= 10) {
+    if (simPosition) {
+      _forceClosePosition(price, now, 'MAX DRAWDOWN');
+    }
+    endSim();
+    return;
+  }
+
+  // Cooldown: ardışık 3 kayıptan sonra bekle
+  if (simConsecLosses >= 3 && (nowMs - simLastSellTime) < simCooldownMs) {
+    updateSimUI();
+    return;
+  }
+
+  // ── POZİSYON YOKSA: Giriş sinyali ara ──────────────────────────────────
+  if (!simPosition) {
+
+    // Sinyal gücüne göre pozisyon büyüklüğü belirle
+    let positionPct = 0;
+    let entryReason = '';
+
+    if (bullProb >= 75 && priceMomentum > 0.1) {
+      positionPct = 0.90; // Çok güçlü sinyal → %90 sermaye
+      entryReason = 'GÜÇLÜ SİNYAL';
+    } else if (bullProb >= 65 && priceMomentum >= 0) {
+      positionPct = 0.65; // Orta güçlü → %65
+      entryReason = 'ORTA SİNYAL';
+    } else if (bullProb >= 58 && priceMomentum > 0.05) {
+      positionPct = 0.40; // Zayıf sinyal → %40
+      entryReason = 'ZAYIF SİNYAL';
+    }
+
+    if (positionPct > 0) {
+      const useAmount = simBalance * positionPct;
+      simBtcHeld = useAmount / price;
+      simEntryPrice = price;
+      simPosition = 'long';
+      simPositionPct = positionPct;
+      simTrailingHigh = price;
+      simPartialTaken = false;
+      addTradeLog('▲ AL', price, useAmount, now, null, entryReason);
+    }
+
+  // ── POZİSYON VARSA: Yönet ───────────────────────────────────────────────
+  } else {
     const pnlPct = ((price - simEntryPrice) / simEntryPrice) * 100;
-    if (pnlPct >= 1.5 || pnlPct <= -1.0 || bullProb <= 38) {
-      const saleVal = simBtcHeld * price;
-      const tradePnl = saleVal - (simBtcHeld * simEntryPrice);
-      simBalance = simBalance * 0.05 + saleVal;
-      if (tradePnl > 0) simWins++; else simLosses++;
-      simTradeCount++;
-      addTradeLog('SAT', price, saleVal, now, tradePnl);
-      simBtcHeld = 0;
-      simPosition = null;
+
+    // Trailing stop güncelle
+    if (price > simTrailingHigh) simTrailingHigh = price;
+    const trailingDropPct = ((simTrailingHigh - price) / simTrailingHigh) * 100;
+
+    // ── Kısmi Kar Al (%1'de yarısını sat) ──────────────────────────────
+    if (!simPartialTaken && pnlPct >= 1.0) {
+      const halfBtc = simBtcHeld * 0.5;
+      const halfVal = halfBtc * price;
+      const halfPnl = halfBtc * (price - simEntryPrice);
+      simBtcHeld -= halfBtc;
+      simBalance += halfVal;
+      simPartialTaken = true;
+      addTradeLog('◑ KISMİ SAT', price, halfVal, now, halfPnl, '%50 KAR ALINDI');
+    }
+
+    // ── Çıkış Koşulları ─────────────────────────────────────────────────
+    let shouldExit = false;
+    let exitReason = '';
+
+    // 1. Take profit: %2.5
+    if (pnlPct >= 2.5) {
+      shouldExit = true;
+      exitReason = 'HEDEF KAR ✓';
+    }
+    // 2. Stop loss: -%1
+    else if (pnlPct <= -1.0) {
+      shouldExit = true;
+      exitReason = 'STOP LOSS ✗';
+    }
+    // 3. Trailing stop: zirveden -%0.8 düşüş
+    else if (trailingDropPct >= 0.8 && pnlPct > 0) {
+      shouldExit = true;
+      exitReason = 'TRAİLİNG STOP';
+    }
+    // 4. Sinyal tersine döndü
+    else if (bullProb <= 35 && priceMomentum < -0.2) {
+      shouldExit = true;
+      exitReason = 'SİNYAL TERSİNE DÖNDÜ';
+    }
+    // 5. Momentum kaybı (fiyat aşağı gidiyor)
+    else if (priceMomentum < -0.5 && pnlPct < 0.2) {
+      shouldExit = true;
+      exitReason = 'MOMENTUM KAYBI';
+    }
+
+    if (shouldExit) {
+      _forceClosePosition(price, now, exitReason);
     }
   }
 
-  const totalVal = simPosition ? (simBalance * 0.05 + simBtcHeld * price) : simBalance;
-  simHistory.push(totalVal);
-  if (simHistory.length > 200) simHistory.shift();
+  const tv = simPosition ? (simBalance * (1 - simPositionPct) + simBtcHeld * price) : simBalance;
+  simHistory.push(tv);
+  if (simHistory.length > 500) simHistory.shift();
   updateSimUI();
+}
+
+function _forceClosePosition(price, now, reason) {
+  const saleVal = simBtcHeld * price;
+  const tradePnl = simBtcHeld * (price - simEntryPrice);
+  simBalance += saleVal;
+  if (tradePnl > 0) { simWins++; simConsecLosses = 0; }
+  else { simLosses++; simConsecLosses++; }
+  simTradeCount++;
+  simLastSellTime = Date.now();
+  addTradeLog('▼ SAT', price, saleVal, now, tradePnl, reason);
+  simBtcHeld = 0;
+  simPosition = null;
+  simPositionPct = 0;
+  simTrailingHigh = 0;
+  simPartialTaken = false;
 }
 
 function updateSimUI() {
@@ -1363,20 +1783,30 @@ function updateSimUI() {
   drawPnlChart();
 }
 
-function addTradeLog(type, price, value, time, pnl) {
+function addTradeLog(type, price, value, time, pnl, reason) {
   const log = document.getElementById('tradeLog');
   const isBuy = type.includes('AL');
+  const isPartial = type.includes('KISMİ');
   const pnlStr = pnl !== null && pnl !== undefined
-    ? (pnl >= 0 ? ' <span style="color:var(--green)">+$' + pnl.toFixed(2) + '</span>' : ' <span style="color:var(--red)">-$' + Math.abs(pnl).toFixed(2) + '</span>')
+    ? (pnl >= 0 ? '<span style="color:var(--green)">+$' + pnl.toFixed(2) + '</span>'
+                : '<span style="color:var(--red)">-$' + Math.abs(pnl).toFixed(2) + '</span>')
     : '';
+  const reasonStr = reason ? `<span style="color:var(--yellow);font-size:9px;letter-spacing:1px">${reason}</span>` : '';
   const div = document.createElement('div');
-  div.className = 'trade-row ' + (isBuy ? 'buy' : 'sell');
+  div.className = 'trade-row ' + (isBuy || isPartial ? 'buy' : 'sell');
   div.innerHTML = `
-    <span style="font-weight:700">${type}</span>
-    <span>$${parseFloat(price).toLocaleString()}</span>
-    <span style="color:var(--dim)">$${parseFloat(value).toFixed(0)}</span>
-    ${pnlStr}
-    <span style="color:var(--dim);font-size:10px">${time}</span>
+    <div style="display:flex;flex-direction:column;gap:2px;width:100%">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:${isBuy ? 'var(--green)' : isPartial ? 'var(--yellow)' : 'var(--red)'};font-weight:700;font-size:12px">${type}</span>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:12px">$${parseFloat(price).toLocaleString('en-US',{maximumFractionDigits:0})}</span>
+        ${pnlStr}
+        <span style="color:var(--dim);font-size:10px">${time}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        ${reasonStr}
+        <span style="color:var(--dim);font-size:10px">$${parseFloat(value).toFixed(0)}</span>
+      </div>
+    </div>
   `;
   log.insertBefore(div, log.firstChild);
 }
@@ -1439,6 +1869,359 @@ function drawPnlChart() {
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   });
   ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+}
+
+
+
+// ─── FEAR & GREED INDEX ─────────────────────────────────────────────────────
+async function fetchFearGreed() {
+  try {
+    const r = await fetch('https://api.alternative.me/fng/?limit=1');
+    const d = await r.json();
+    return parseInt(d.data[0].value);
+  } catch(e) { return 50; }
+}
+
+// ─── CORRELATIONS (CoinGecko) ────────────────────────────────────────────────
+async function fetchCorrelations() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_market_cap=true');
+    const d = await r.json();
+    // BTC dominance approximation
+    const btcMcap = d.bitcoin.usd_market_cap;
+    return { btcMcap };
+  } catch(e) { return null; }
+}
+
+async function fetchBtcDominance() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/global');
+    const d = await r.json();
+    return d.data.market_cap_percentage.btc;
+  } catch(e) { return null; }
+}
+
+// ─── SUPPORT/RESISTANCE CALCULATOR ──────────────────────────────────────────
+function calcSupportResistance(klines, currentPrice) {
+  const closes = klines.map(k => k.close);
+  const highs = klines.map(k => k.high || k.close * 1.002);
+  const lows = klines.map(k => k.low || k.close * 0.998);
+
+  // Find pivot highs and lows
+  const pivotHighs = [];
+  const pivotLows = [];
+
+  for (let i = 2; i < closes.length - 2; i++) {
+    if (highs[i] > highs[i-1] && highs[i] > highs[i-2] && highs[i] > highs[i+1] && highs[i] > highs[i+2]) {
+      pivotHighs.push(highs[i]);
+    }
+    if (lows[i] < lows[i-1] && lows[i] < lows[i-2] && lows[i] < lows[i+1] && lows[i] < lows[i+2]) {
+      pivotLows.push(lows[i]);
+    }
+  }
+
+  // Cluster nearby levels
+  const resistance = [...new Set(pivotHighs.filter(h => h > currentPrice).sort((a,b) => a-b).slice(0,3))];
+  const support = [...new Set(pivotLows.filter(l => l < currentPrice).sort((a,b) => b-a).slice(0,3))];
+
+  // If not enough pivots, use percentage levels
+  if (resistance.length < 2) {
+    resistance.push(currentPrice * 1.02, currentPrice * 1.05);
+  }
+  if (support.length < 2) {
+    support.push(currentPrice * 0.98, currentPrice * 0.95);
+  }
+
+  return { resistance: resistance.slice(0,3), support: support.slice(0,3) };
+}
+
+// ─── FIBONACCI LEVELS ────────────────────────────────────────────────────────
+function calcFibonacci(klines, currentPrice) {
+  const closes = klines.map(k => k.close);
+  const high = Math.max(...closes);
+  const low = Math.min(...closes);
+  const diff = high - low;
+
+  const fibs = [
+    { level: '0.236', price: high - diff * 0.236 },
+    { level: '0.382', price: high - diff * 0.382 },
+    { level: '0.500', price: high - diff * 0.500 },
+    { level: '0.618', price: high - diff * 0.618 },
+    { level: '0.786', price: high - diff * 0.786 },
+  ];
+
+  return fibs;
+}
+
+// ─── CANDLE PATTERN DETECTION ────────────────────────────────────────────────
+function detectCandlePattern(klines) {
+  if (klines.length < 3) return { name: 'Yetersiz veri', signal: 'neutral', note: '' };
+
+  const c = klines.slice(-3);
+  const [c1, c2, c3] = c;
+
+  const body1 = Math.abs(c1.close - (c1.open || c1.close));
+  const body2 = Math.abs(c2.close - (c2.open || c2.close));
+  const body3 = Math.abs(c3.close - (c3.open || c3.close));
+  const avgBody = (body1 + body2 + body3) / 3;
+
+  // Doji
+  if (body3 < avgBody * 0.1) {
+    return { name: 'DOJİ ◈', signal: 'neutral', note: 'Kararsızlık - Yön değişimi olabilir' };
+  }
+
+  // Bullish engulfing
+  if (c2.close < (c2.open || c2.close) && c3.close > (c3.open || c3.close) && body3 > body2 * 1.5) {
+    return { name: 'BULLISH ENGULFING ▲', signal: 'bull', note: 'Yutma formasyonu - Güçlü yükseliş sinyali' };
+  }
+
+  // Bearish engulfing
+  if (c2.close > (c2.open || c2.close) && c3.close < (c3.open || c3.close) && body3 > body2 * 1.5) {
+    return { name: 'BEARISH ENGULFING ▼', signal: 'bear', note: 'Yutma formasyonu - Güçlü düşüş sinyali' };
+  }
+
+  // Three green candles (bullish)
+  if (c1.close > (c1.open||c1.close) && c2.close > (c2.open||c2.close) && c3.close > (c3.open||c3.close)) {
+    return { name: 'ÜÇ BEYAZ ASKER ▲▲▲', signal: 'bull', note: 'Ardışık 3 yükseliş mumu - Güçlü momentum' };
+  }
+
+  // Three red candles (bearish)
+  if (c1.close < (c1.open||c1.close) && c2.close < (c2.open||c2.close) && c3.close < (c3.open||c3.close)) {
+    return { name: 'ÜÇ KARA KARGA ▼▼▼', signal: 'bear', note: 'Ardışık 3 düşüş mumu - Güçlü satış baskısı' };
+  }
+
+  // Hammer (long lower shadow)
+  const lowerShadow3 = (c3.low || c3.close * 0.998) - Math.min(c3.close, c3.open || c3.close);
+  if (lowerShadow3 > body3 * 2 && c3.close > (c3.open || c3.close)) {
+    return { name: 'HAMMER 🔨', signal: 'bull', note: 'Uzun alt gölge - Alıcılar desteği korudu' };
+  }
+
+  // Last candle direction
+  if (c3.close > (c3.open || c3.close)) {
+    return { name: 'YÜKSELİŞ MUMU ▲', signal: 'bull', note: 'Son mum yükselişte kapandı' };
+  } else {
+    return { name: 'DÜŞÜŞ MUMU ▼', signal: 'bear', note: 'Son mum düşüşte kapandı' };
+  }
+}
+
+// ─── MARKET STRUCTURE ────────────────────────────────────────────────────────
+function analyzeMarketStructure(klines, currentPrice) {
+  if (klines.length < 20) return { structure: 'Yetersiz veri', signal: 'neutral', note: '', fvg: [] };
+
+  const closes = klines.map(k => k.close);
+  const recent = closes.slice(-20);
+
+  // Higher Highs / Lower Lows detection
+  let hhCount = 0, llCount = 0, hlCount = 0, lhCount = 0;
+  for (let i = 5; i < recent.length; i += 5) {
+    const prev = recent.slice(i-5, i);
+    const curr = recent.slice(i);
+    const prevHigh = Math.max(...prev);
+    const prevLow = Math.min(...prev);
+    const currHigh = Math.max(...curr);
+    const currLow = Math.min(...curr);
+
+    if (currHigh > prevHigh) hhCount++;
+    if (currLow < prevLow) llCount++;
+    if (currLow > prevLow && currHigh < prevHigh) hlCount++;
+    if (currHigh < prevHigh && currLow > prevLow) lhCount++;
+  }
+
+  // Fair Value Gaps (FVG) - institutional price gaps
+  const fvgs = [];
+  for (let i = 1; i < klines.length - 1; i++) {
+    const prev = klines[i-1];
+    const next = klines[i+1];
+    const prevHigh = prev.high || prev.close * 1.001;
+    const nextLow = next.low || next.close * 0.999;
+    if (nextLow > prevHigh * 1.003) {
+      fvgs.push({ type: 'bull', low: prevHigh, high: nextLow });
+    }
+    const prevLow = prev.low || prev.close * 0.999;
+    const nextHigh = next.high || next.close * 1.001;
+    if (nextHigh < prevLow * 0.997) {
+      fvgs.push({ type: 'bear', low: nextHigh, high: prevLow });
+    }
+  }
+
+  const nearFvg = fvgs.filter(g => Math.abs(g.low - currentPrice) / currentPrice < 0.03).slice(-2);
+
+  if (hhCount >= 2 && llCount === 0) {
+    return { structure: 'YÜKSELİŞ YAPISI ▲', signal: 'bull', note: 'Higher High + Higher Low - Güçlü yükseliş trendi', fvg: nearFvg };
+  }
+  if (llCount >= 2 && hhCount === 0) {
+    return { structure: 'DÜŞÜŞ YAPISI ▼', signal: 'bear', note: 'Lower Low + Lower High - Güçlü düşüş trendi', fvg: nearFvg };
+  }
+  if (hhCount > 0 && llCount > 0) {
+    return { structure: 'KONSOLIDASYON ◈', signal: 'neutral', note: 'Karışık yapı - Kırılma bekleniyor', fvg: nearFvg };
+  }
+  return { structure: 'NÖTR', signal: 'neutral', note: 'Belirgin yapı yok', fvg: nearFvg };
+}
+
+// ─── LIQUIDITY POOLS ─────────────────────────────────────────────────────────
+function calcLiquidityPools(klines, currentPrice) {
+  // Stop loss clusters are typically just below support and above resistance
+  // These are where market makers hunt for liquidity
+  const closes = klines.map(k => k.close);
+  const sorted = [...closes].sort((a,b) => a-b);
+  const len = sorted.length;
+
+  // Find dense price clusters (where many candles closed)
+  const pools = [];
+  const bucketSize = currentPrice * 0.005; // 0.5% buckets
+
+  const buckets = {};
+  closes.forEach(c => {
+    const bucket = Math.round(c / bucketSize) * bucketSize;
+    buckets[bucket] = (buckets[bucket] || 0) + 1;
+  });
+
+  Object.entries(buckets)
+    .filter(([,count]) => count >= 3)
+    .sort((a,b) => b[1]-a[1])
+    .slice(0,5)
+    .forEach(([price, count]) => {
+      const p = parseFloat(price);
+      pools.push({
+        price: p,
+        type: p > currentPrice ? 'bear' : 'bull',
+        strength: count,
+        label: p > currentPrice ? '🔴 SHORT LİKİDİTE' : '🟢 LONG LİKİDİTE'
+      });
+    });
+
+  return pools.sort((a,b) => Math.abs(a.price - currentPrice) - Math.abs(b.price - currentPrice));
+}
+
+// ─── RENDER ALL NEW PANELS ───────────────────────────────────────────────────
+function renderFearGreed(value) {
+  const el = document.getElementById('fgValue');
+  const label = document.getElementById('fgLabel');
+  const badge = document.getElementById('fgBadge');
+  const marker = document.getElementById('fgMarker');
+
+  el.textContent = value;
+  marker.style.left = value + '%';
+
+  let txt, cls, color;
+  if (value <= 20)      { txt = 'AŞIRI KORKU';     cls = 'bull';    color = '#ff3366'; }
+  else if (value <= 40) { txt = 'KORKU';            cls = 'neutral'; color = '#ff6633'; }
+  else if (value <= 60) { txt = 'NÖTR';             cls = 'neutral'; color = '#ffd700'; }
+  else if (value <= 80) { txt = 'AÇGÖZLÜLÜK';       cls = 'bear';    color = '#88ff00'; }
+  else                  { txt = 'AŞIRI AÇGÖZLÜLÜK'; cls = 'bear';    color = '#00ff88'; }
+
+  el.style.color = color;
+  label.textContent = txt;
+  label.style.color = color;
+  badge.textContent = txt;
+  badge.className = 'signal-badge ' + cls;
+}
+
+function renderSupportResistance(sr, fibs, currentPrice) {
+  const resEl = document.getElementById('resistanceLevels');
+  const supEl = document.getElementById('supportLevels');
+  const fibEl = document.getElementById('fibLevels');
+  const badge = document.getElementById('srBadge');
+
+  resEl.innerHTML = sr.resistance.map(r => `
+    <div style="display:flex;justify-content:space-between;padding:6px 10px;margin-bottom:4px;
+      background:rgba(255,51,102,0.08);border:1px solid rgba(255,51,102,0.2);border-radius:6px">
+      <span style="color:var(--red);font-family:'Share Tech Mono',monospace;font-size:13px">$${r.toLocaleString('en-US',{maximumFractionDigits:0})}</span>
+      <span style="color:var(--dim);font-size:11px">+${(((r-currentPrice)/currentPrice)*100).toFixed(1)}%</span>
+    </div>
+  `).join('');
+
+  supEl.innerHTML = sr.support.map(s => `
+    <div style="display:flex;justify-content:space-between;padding:6px 10px;margin-bottom:4px;
+      background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:6px">
+      <span style="color:var(--green);font-family:'Share Tech Mono',monospace;font-size:13px">$${s.toLocaleString('en-US',{maximumFractionDigits:0})}</span>
+      <span style="color:var(--dim);font-size:11px">${(((s-currentPrice)/currentPrice)*100).toFixed(1)}%</span>
+    </div>
+  `).join('');
+
+  fibEl.innerHTML = fibs.map(f => {
+    const isNear = Math.abs(f.price - currentPrice) / currentPrice < 0.02;
+    return `<div style="padding:5px 10px;border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:11px;
+      background:${isNear ? 'rgba(255,215,0,0.15)' : 'rgba(255,255,255,0.03)'};
+      border:1px solid ${isNear ? 'rgba(255,215,0,0.4)' : 'var(--border)'};
+      color:${isNear ? 'var(--yellow)' : 'var(--dim)'}">
+      ${f.level} · $${f.price.toLocaleString('en-US',{maximumFractionDigits:0})}
+    </div>`;
+  }).join('');
+
+  // Find nearest level
+  const allLevels = [...sr.resistance, ...sr.support, ...fibs.map(f=>f.price)];
+  const nearest = allLevels.sort((a,b) => Math.abs(a-currentPrice) - Math.abs(b-currentPrice))[0];
+  const dist = ((nearest - currentPrice) / currentPrice * 100).toFixed(1);
+  badge.textContent = `En yakın: ${dist > 0 ? '+' : ''}${dist}%`;
+  badge.className = 'signal-badge neutral';
+}
+
+function renderCorrelations(domValue) {
+  const badge = document.getElementById('corrBadge');
+
+  // DXY - inverse correlation with BTC
+  // Estimate: use a simple heuristic based on recent BTC change
+  const btcChange = currentPrice ? ((priceHistory[priceHistory.length-1] - priceHistory[0]) / priceHistory[0] * 100) : 0;
+  const dxyEst = -btcChange * 0.3; // rough inverse
+
+  const dxyEl = document.getElementById('dxyVal');
+  const dxyNote = document.getElementById('dxyNote');
+  dxyEl.textContent = (dxyEst >= 0 ? '+' : '') + dxyEst.toFixed(2) + '%';
+  dxyEl.style.color = dxyEst > 0 ? 'var(--red)' : 'var(--green)';
+  dxyNote.textContent = dxyEst > 0.5 ? 'Dolar güçlü → BTC baskı' : dxyEst < -0.5 ? 'Dolar zayıf → BTC fırsat' : 'Nötr etki';
+
+  // S&P500 - positive correlation
+  const spxEl = document.getElementById('spxVal');
+  const spxNote = document.getElementById('spxNote');
+  spxEl.textContent = btcChange >= 0 ? 'POZİTİF' : 'NEGATİF';
+  spxEl.style.color = btcChange >= 0 ? 'var(--green)' : 'var(--red)';
+  spxNote.textContent = 'BTC ile yüksek korelasyon';
+
+  // BTC Dominance
+  const domEl = document.getElementById('domVal');
+  const domNote = document.getElementById('domNote');
+  if (domValue) {
+    domEl.textContent = domValue.toFixed(1) + '%';
+    domEl.style.color = domValue > 50 ? 'var(--green)' : 'var(--yellow)';
+    domNote.textContent = domValue > 55 ? 'BTC güçlü - Altcoin satış' : domValue < 45 ? 'Altcoin sezonu' : 'Dengeli piyasa';
+    badge.textContent = domValue > 50 ? 'BTC BASKILI' : 'ALTCOIN SEZONU';
+    badge.className = 'signal-badge ' + (domValue > 50 ? 'bull' : 'neutral');
+  }
+}
+
+function renderCandleAndStructure(pattern, structure, liquidityPools) {
+  const patEl = document.getElementById('candlePattern');
+  const patNote = document.getElementById('candleNote');
+  const strEl = document.getElementById('marketStructure');
+  const strNote = document.getElementById('structureNote');
+  const liqEl = document.getElementById('liquidityPools');
+  const badge = document.getElementById('patternBadge');
+
+  patEl.textContent = pattern.name;
+  patEl.style.color = pattern.signal === 'bull' ? 'var(--green)' : pattern.signal === 'bear' ? 'var(--red)' : 'var(--yellow)';
+  patNote.textContent = pattern.note;
+
+  strEl.textContent = structure.structure;
+  strEl.style.color = structure.signal === 'bull' ? 'var(--green)' : structure.signal === 'bear' ? 'var(--red)' : 'var(--yellow)';
+  strNote.textContent = structure.note;
+  if (structure.fvg && structure.fvg.length > 0) {
+    strNote.textContent += ` | FVG: $${structure.fvg[0].low.toLocaleString('en-US',{maximumFractionDigits:0})}`;
+  }
+
+  liqEl.innerHTML = liquidityPools.slice(0,4).map(p => `
+    <div style="padding:5px 12px;border-radius:20px;font-family:'Share Tech Mono',monospace;font-size:11px;
+      background:${p.type==='bear' ? 'rgba(255,51,102,0.1)' : 'rgba(0,255,136,0.1)'};
+      border:1px solid ${p.type==='bear' ? 'rgba(255,51,102,0.3)' : 'rgba(0,255,136,0.3)'};
+      color:${p.type==='bear' ? 'var(--red)' : 'var(--green)'}">
+      ${p.label} $${p.price.toLocaleString('en-US',{maximumFractionDigits:0})}
+    </div>
+  `).join('');
+
+  const bullSignals = [pattern.signal, structure.signal].filter(s => s === 'bull').length;
+  const bearSignals = [pattern.signal, structure.signal].filter(s => s === 'bear').length;
+  badge.textContent = bullSignals > bearSignals ? '▲ BOĞA YAPISI' : bearSignals > bullSignals ? '▼ AYI YAPISI' : 'NÖTR';
+  badge.className = 'signal-badge ' + (bullSignals > bearSignals ? 'bull' : bearSignals > bullSignals ? 'bear' : 'neutral');
 }
 
 
@@ -1569,13 +2352,17 @@ async function fullAnalysisUpdate() {
     const volumeRatio = curVol / avgVol;
 
     // Fetch orderbook for ob ratio
-    const ob = await fetchOrderBook();
+    const [ob, lsData] = await Promise.all([fetchOrderBook(), fetchLongShort()]);
     const { ratio: obRatio } = analyzeOrderBook(ob.bids, ob.asks);
+    const lsInfo = updateLongShort(lsData, obRatio);
 
-    const probs = calcProbability({ rsi, macd, momentum, obRatio, priceChange: change24, volumeRatio });
+    const lsRatio = lsInfo ? lsInfo.ratio : 1;
+    const fundingVal = lsData ? lsData.funding : 0;
+    const probs = calcProbability({ rsi, macd, momentum, obRatio, priceChange: change24, volumeRatio, lsRatio, funding: fundingVal });
     window._lastProbs = probs;
 
     // Update probabilities
+    renderSmartSignals(probs.signals);
     document.getElementById('bullProb').textContent = probs.bull + '%';
     document.getElementById('bearProb').textContent = probs.bear + '%';
     document.getElementById('bullBar').style.width = probs.bull + '%';
@@ -1595,6 +2382,48 @@ async function fullAnalysisUpdate() {
     const obClass = obRatio > 0.55 ? 'bull' : obRatio < 0.45 ? 'bear' : 'neutral';
     setIndicator('ob-val', (obRatio * 100).toFixed(0) + '%', 'ob-sig', obRatio > 0.55 ? 'ALIŞ BASKISI' : obRatio < 0.45 ? 'SATIŞ BASKISI' : 'DENGELİ', obClass);
     setIndicator('trend-val', (change24 >= 0 ? '+' : '') + change24.toFixed(2) + '%', 'trend-sig', change24 > 1 ? 'GÜÇLÜ ▲' : change24 < -1 ? 'GÜÇLÜ ▼' : 'ZAYIF', change24 > 0 ? 'bull' : 'bear');
+
+    // ── NEW PANELS ──
+    const [fgVal, domVal] = await Promise.all([fetchFearGreed(), fetchBtcDominance()]);
+
+    // Fear & Greed
+    renderFearGreed(fgVal);
+
+    // Support/Resistance & Fibonacci (use extended klines)
+    const extKlines = await fetch('https://api.kraken.com/0/public/OHLC?pair=XBTUSD&interval=60')
+      .then(r=>r.json())
+      .then(d=>d.result.XXBTZUSD.slice(-100).map(k=>({
+        open:parseFloat(k[1]),high:parseFloat(k[2]),low:parseFloat(k[3]),
+        close:parseFloat(k[4]),volume:parseFloat(k[6])
+      })))
+      .catch(()=>klines);
+
+    const sr = calcSupportResistance(extKlines, price);
+    const fibs = calcFibonacci(extKlines, price);
+    renderSupportResistance(sr, fibs, price);
+
+    // Correlations
+    renderCorrelations(domVal);
+
+    // Candle patterns & Market structure
+    const pattern = detectCandlePattern(extKlines);
+    const structure = analyzeMarketStructure(extKlines, price);
+    const liqPools = calcLiquidityPools(extKlines, price);
+    renderCandleAndStructure(pattern, structure, liqPools);
+
+    // Update calc with new signals
+    const patternScore = pattern.signal === 'bull' ? 8 : pattern.signal === 'bear' ? -8 : 0;
+    const structScore = structure.signal === 'bull' ? 10 : structure.signal === 'bear' ? -10 : 0;
+    const fgScore = fgVal < 20 ? 15 : fgVal < 35 ? 8 : fgVal > 80 ? -15 : fgVal > 65 ? -8 : 0;
+
+    // Re-calc final probability with all factors
+    const finalBull = Math.max(10, Math.min(90, probs.bull + patternScore + structScore + fgScore));
+    const finalBear = 100 - finalBull;
+    document.getElementById('bullProb').textContent = finalBull + '%';
+    document.getElementById('bearProb').textContent = finalBear + '%';
+    document.getElementById('bullBar').style.width = finalBull + '%';
+    document.getElementById('bearBar').style.width = finalBear + '%';
+    window._lastProbs = { ...probs, bull: finalBull, bear: finalBear };
 
     document.getElementById('loading').style.display = 'none';
 
