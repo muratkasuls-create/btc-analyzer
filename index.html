@@ -1088,6 +1088,13 @@ body::before {
       </div>
     </div>
 
+
+
+  </div><!-- end col-right -->
+
+  <!-- ── BOT COLUMN ──────────────────────────────────────── -->
+  <div class="col-bot">
+
     <!-- Fiyat geçmişi sparkline -->
     <div class="panel" style="flex:0 0 auto">
       <div class="panel-title">// FİYAT GEÇMİŞİ</div>
@@ -1095,12 +1102,6 @@ body::before {
         <canvas id="sparklineCanvas"></canvas>
       </div>
     </div>
-
-
-  </div><!-- end col-right -->
-
-  <!-- ── BOT COLUMN ──────────────────────────────────────── -->
-  <div class="col-bot">
 
     <!-- Multi-Timeframe Analysis + Tavsiye -->
     <div class="panel" style="flex:0 0 auto">
@@ -1163,15 +1164,20 @@ body::before {
 
         <div class="sim-input-row">
           <span style="color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:12px">$</span>
-          <input type="number" id="simAmount" class="sim-input" placeholder="1000" min="10">
+          <input type="number" id="simAmount" class="sim-input" placeholder="1000" min="10" value="1000">
+        </div>
+        <div class="time-btns" style="margin-bottom:4px">
           <button class="btn-quick" onclick="setSimAmount(100)">$100</button>
+          <button class="btn-quick" onclick="setSimAmount(200)">$200</button>
           <button class="btn-quick" onclick="setSimAmount(500)">$500</button>
           <button class="btn-quick" onclick="setSimAmount(1000)">$1K</button>
+          <button class="btn-quick" onclick="setSimAmount(5000)">$5K</button>
+          <button class="btn-quick" onclick="setSimAmount(10000)">$10K</button>
         </div>
 
         <div class="time-btns">
           <button class="time-btn" onclick="setSimTime(5,'5 DAK')">5D</button>
-          <button class="time-btn active" onclick="setSimTime(15,'15 DAK')">15D</button>
+          <button class="time-btn active" id="timebtn-15" onclick="setSimTime(15,'15 DAK')">15D</button>
           <button class="time-btn" onclick="setSimTime(60,'1S')">1S</button>
           <button class="time-btn" onclick="setSimTime(240,'4S')">4S</button>
           <button class="time-btn" onclick="setSimTime(720,'12S')">12S</button>
@@ -2267,28 +2273,37 @@ async
 // ─── SUPPORT / RESISTANCE ────────────────────────────────────────────────────
 function calcSupportResistance(klines, currentPrice) {
   if (!klines || klines.length < 5) return { resistance: [], support: [] };
-  const highs  = klines.map(k => k.high);
-  const lows   = klines.map(k => k.low);
-  const closes = klines.map(k => k.close);
   const resistance = [], support = [];
-  const bucket = currentPrice * 0.004;
+  const bucket = currentPrice * 0.003; // tighter buckets = more levels
 
-  // Swing highs
-  for (let i = 2; i < highs.length - 2; i++) {
-    if (highs[i] > highs[i-1] && highs[i] > highs[i-2] && highs[i] > highs[i+1] && highs[i] > highs[i+2]) {
-      const lvl = Math.round(highs[i] / bucket) * bucket;
-      if (!resistance.find(r => Math.abs(r - lvl) < bucket) && lvl > currentPrice)
-        resistance.push(lvl);
-    }
+  const addLevel = (price, arr, isRes) => {
+    if (!price || !isFinite(price)) return;
+    const rounded = Math.round(price / bucket) * bucket;
+    const list = isRes ? resistance : support;
+    const condition = isRes ? rounded > currentPrice * 1.001 : rounded < currentPrice * 0.999;
+    if (condition && !list.find(x => Math.abs(x - rounded) < bucket * 1.5))
+      list.push(rounded);
+  };
+
+  // 1. Swing highs/lows (lookahead 1)
+  for (let i = 1; i < klines.length - 1; i++) {
+    if (klines[i].high >= klines[i-1].high && klines[i].high >= klines[i+1].high)
+      addLevel(klines[i].high, resistance, true);
+    if (klines[i].low <= klines[i-1].low && klines[i].low <= klines[i+1].low)
+      addLevel(klines[i].low, support, false);
   }
-  // Swing lows
-  for (let i = 2; i < lows.length - 2; i++) {
-    if (lows[i] < lows[i-1] && lows[i] < lows[i-2] && lows[i] < lows[i+1] && lows[i] < lows[i+2]) {
-      const lvl = Math.round(lows[i] / bucket) * bucket;
-      if (!support.find(s => Math.abs(s - lvl) < bucket) && lvl < currentPrice)
-        support.push(lvl);
-    }
-  }
+
+  // 2. Round number levels (psychological)
+  const roundStep = currentPrice < 10000 ? 100 : currentPrice < 50000 ? 500 : 1000;
+  for (let p = Math.ceil(currentPrice / roundStep) * roundStep; p <= currentPrice * 1.05; p += roundStep)
+    addLevel(p, resistance, true);
+  for (let p = Math.floor(currentPrice / roundStep) * roundStep; p >= currentPrice * 0.95; p -= roundStep)
+    addLevel(p, support, false);
+
+  // 3. Recent high/low of last 24 candles
+  const recent = klines.slice(-24);
+  addLevel(Math.max(...recent.map(k=>k.high)), resistance, true);
+  addLevel(Math.min(...recent.map(k=>k.low)), support, false);
 
   resistance.sort((a, b) => a - b);
   support.sort((a, b) => b - a);
@@ -2377,8 +2392,10 @@ function renderCorrelations(domValue) {
   const dxyEl   = document.getElementById('dxyVal');
   const dxyNote = document.getElementById('dxyNote');
   if (dxyEl) {
-    dxyEl.textContent = (dxyEst >= 0 ? '+' : '') + dxyEst.toFixed(2) + '%';
-    dxyEl.style.color = dxyEst > 0 ? 'var(--red)' : 'var(--green)';
+    // Always show something - use BTC change as DXY proxy
+    const displayVal = isFinite(dxyEst) ? (dxyEst >= 0 ? '+' : '') + dxyEst.toFixed(2) + '%' : '~0.00%';
+    dxyEl.textContent = displayVal + ' (est)';
+    dxyEl.style.color = dxyEst > 0 ? 'var(--red)' : dxyEst < 0 ? 'var(--green)' : 'var(--dim)';
   }
   if (dxyNote) dxyNote.textContent = dxyEst > 0.5 ? 'Dolar güçlü → BTC baskı' : dxyEst < -0.5 ? 'Dolar zayıf → BTC fırsat' : 'Nötr etki';
 
@@ -2486,36 +2503,39 @@ function analyzeMarketStructure(klines, currentPrice) {
 // ─── LIQUIDITY POOLS ─────────────────────────────────────────────────────────
 function calcLiquidityPools(klines, currentPrice) {
   if (!klines || klines.length < 10) return [];
-  const pools = [];
-  const bucketSize = currentPrice * 0.004; // 0.4% buckets
+  const bucketSize = currentPrice * 0.003;
+  const aboveBuckets = {}, belowBuckets = {};
 
-  // Count candle closes per price bucket
-  const buckets = {};
   klines.forEach(k => {
-    // High wick clusters = bear liquidity (stop hunts above)
-    const hBucket = Math.round(k.high / bucketSize) * bucketSize;
-    buckets[hBucket] = (buckets[hBucket] || 0) + 0.5;
-    // Low wick clusters = bull liquidity (stop hunts below)
-    const lBucket = Math.round(k.low / bucketSize) * bucketSize;
-    buckets[lBucket] = (buckets[lBucket] || 0) + 0.5;
-    // Close clusters
-    const cBucket = Math.round(k.close / bucketSize) * bucketSize;
-    buckets[cBucket] = (buckets[cBucket] || 0) + 1;
+    // Wicks above current price = SHORT stop clusters (bear liquidity)
+    if (k.high > currentPrice) {
+      const b = Math.round(k.high / bucketSize) * bucketSize;
+      aboveBuckets[b] = (aboveBuckets[b] || 0) + 1;
+    }
+    // Wicks below current price = LONG stop clusters (bull liquidity)
+    if (k.low < currentPrice) {
+      const b = Math.round(k.low / bucketSize) * bucketSize;
+      belowBuckets[b] = (belowBuckets[b] || 0) + 1;
+    }
   });
 
-  // Sort by density and pick top clusters
-  const sorted = Object.entries(buckets)
+  const pools = [];
+
+  // Top 2 bear (short) liquidity pools above
+  Object.entries(aboveBuckets)
+    .filter(([p]) => parseFloat(p) > currentPrice * 1.001)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 8);
+    .slice(0, 2)
+    .forEach(([p, d]) => pools.push({ price: parseFloat(p), density: d, type: 'bear' }));
 
-  sorted.forEach(([priceStr, density]) => {
-    const price = parseFloat(priceStr);
-    if (Math.abs(price - currentPrice) / currentPrice < 0.001) return; // skip current price
-    const type = price > currentPrice ? 'bear' : 'bull';
-    pools.push({ price, density, type });
-  });
+  // Top 2 bull (long) liquidity pools below
+  Object.entries(belowBuckets)
+    .filter(([p]) => parseFloat(p) < currentPrice * 0.999)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .forEach(([p, d]) => pools.push({ price: parseFloat(p), density: d, type: 'bull' }));
 
-  return pools.sort((a, b) => Math.abs(a.price - currentPrice) - Math.abs(b.price - currentPrice)).slice(0, 4);
+  return pools.sort((a, b) => Math.abs(a.price - currentPrice) - Math.abs(b.price - currentPrice));
 }
 
 // ─── RENDER CANDLE & STRUCTURE ───────────────────────────────────────────────
@@ -2848,6 +2868,18 @@ async function updateMTFAnalysis() {
   setTimeout(updateMTFAnalysis, 60000); // update every 60s
 }
 
+
+function setSimAmount(val) {
+  document.getElementById('simAmount').value = val;
+}
+
+function setSimTime(minutes, label) {
+  simDurationMs = minutes * 60 * 1000;
+  simDurationLabel = label;
+  simSelectedDur = minutes;
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+  if (event && event.target) event.target.classList.add('active');
+}
 
 // ─── COUNTDOWN ─────────────────────────────────────────────────────────────
 function startCountdown() {
