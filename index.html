@@ -1,4 +1,4 @@
-<!index.html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -470,6 +470,119 @@
     .indicators { grid-template-columns: repeat(2, 1fr); }
     .price-main { font-size: 36px; }
   }
+
+  /* Simulation Panel */
+  .sim-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .sim-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .sim-stat {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .sim-stat label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--dim);
+    font-family: 'Share Tech Mono', monospace;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .sim-stat .val {
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .sim-trades {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 12px;
+  }
+
+  .trade-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    background: rgba(255,255,255,0.02);
+  }
+
+  .trade-row.buy { border-left: 3px solid var(--green); }
+  .trade-row.sell { border-left: 3px solid var(--red); }
+
+  .sim-btn {
+    background: rgba(0,170,255,0.15);
+    border: 1px solid rgba(0,170,255,0.3);
+    color: var(--blue);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    margin-right: 8px;
+    transition: all 0.2s;
+  }
+
+  .sim-btn:hover { background: rgba(0,170,255,0.25); }
+  .sim-btn.danger { background: rgba(255,51,102,0.15); border-color: rgba(255,51,102,0.3); color: var(--red); }
+
+  .pnl-chart {
+    width: 100%;
+    height: 80px;
+    display: block;
+    margin-top: 12px;
+  }
+
+
+  .quick-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    color: var(--dim);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .quick-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+  .dur-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    color: var(--dim);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .dur-btn:hover { background: rgba(0,170,255,0.1); color: var(--blue); }
+
 </style>
 </head>
 <body>
@@ -598,6 +711,97 @@
     <canvas id="sparkline"></canvas>
   </div>
 
+
+  <!-- Simulation Panel -->
+  <div class="sim-panel">
+    <div class="signal-header">
+      <span class="signal-title">// SİMÜLASYON BOTU</span>
+      <span id="simStatus" class="signal-badge neutral">BEKLEMEDE</span>
+    </div>
+
+    <!-- Amount -->
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:8px">BAŞLANGIÇ TUTARI</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div style="position:relative;flex:1;min-width:140px">
+          <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:16px">$</span>
+          <input id="simAmount" type="number" value="1000" min="10"
+            style="width:100%;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.3);
+            color:#fff;padding:10px 12px 10px 28px;border-radius:8px;font-family:'Share Tech Mono',monospace;
+            font-size:18px;outline:none;box-sizing:border-box" />
+        </div>
+        <button onclick="setAmt(100)" class="quick-btn">$100</button>
+        <button onclick="setAmt(500)" class="quick-btn">$500</button>
+        <button onclick="setAmt(1000)" class="quick-btn">$1K</button>
+        <button onclick="setAmt(5000)" class="quick-btn">$5K</button>
+      </div>
+    </div>
+
+    <!-- Duration -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:8px">SİMÜLASYON SÜRESİ</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="setDur(5,'5 DAKİKA')" class="dur-btn" id="dur-5">5 DAK</button>
+        <button onclick="setDur(15,'15 DAKİKA')" class="dur-btn" id="dur-15">15 DAK</button>
+        <button onclick="setDur(60,'1 SAAT')" class="dur-btn" id="dur-60">1 SAAT</button>
+        <button onclick="setDur(240,'4 SAAT')" class="dur-btn" id="dur-240">4 SAAT</button>
+        <button onclick="setDur(720,'12 SAAT')" class="dur-btn" id="dur-720">12 SAAT</button>
+        <button onclick="setDur(1440,'24 SAAT')" class="dur-btn" id="dur-1440">24 SAAT</button>
+      </div>
+    </div>
+
+    <!-- Timer bar -->
+    <div id="simTimerBox" style="display:none;background:rgba(0,170,255,0.06);border:1px solid rgba(0,170,255,0.2);border-radius:10px;padding:14px;margin-bottom:14px;text-align:center">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:6px">KALAN SÜRE</div>
+      <div id="simTimer" style="font-size:32px;font-weight:700;font-family:'Share Tech Mono',monospace;color:var(--blue)">--:--:--</div>
+      <div style="height:5px;background:rgba(255,255,255,0.05);border-radius:3px;margin-top:10px;overflow:hidden">
+        <div id="simTimerBar" style="height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:3px;width:100%;transition:width 1s linear"></div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div style="margin-bottom:16px">
+      <button class="sim-btn" id="simStartBtn" onclick="startSim()">▶ BAŞLAT</button>
+      <button class="sim-btn danger" onclick="resetSim()">↺ SIFIRLA</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="sim-stats">
+      <div class="sim-stat">
+        <label>BAŞLANGIÇ</label>
+        <div class="val" id="simStart" style="color:var(--text)">-</div>
+      </div>
+      <div class="sim-stat">
+        <label>GÜNCEL DEĞER</label>
+        <div class="val" id="simBalance" style="color:var(--text)">-</div>
+      </div>
+      <div class="sim-stat">
+        <label>KAR / ZARAR $</label>
+        <div class="val" id="simPnl">-</div>
+      </div>
+      <div class="sim-stat">
+        <label>KAR / ZARAR %</label>
+        <div class="val" id="simPnlPct">-</div>
+      </div>
+      <div class="sim-stat">
+        <label>KAZANAN ✓</label>
+        <div class="val" id="simWins" style="color:var(--green)">0</div>
+      </div>
+      <div class="sim-stat">
+        <label>KAYBEDEN ✗</label>
+        <div class="val" id="simLosses" style="color:var(--red)">0</div>
+      </div>
+    </div>
+
+    <canvas class="pnl-chart" id="pnlChart"></canvas>
+
+    <!-- Final result -->
+    <div id="simResult" style="display:none;margin-top:16px;padding:20px;border-radius:12px;text-align:center"></div>
+
+    <div class="signal-title" style="margin:14px 0 8px">// İŞLEM GEÇMİŞİ</div>
+    <div class="sim-trades" id="tradeLog"></div>
+  </div>
+
   <div class="footer-note">
     <span>⚠ UYARI:</span> Bu uygulama yalnızca bilgilendirme amaçlıdır.<br>
     Veriler Binance'den gerçek zamanlı çekilmektedir · Analiz algoritmik hesaplama içerir<br>
@@ -616,15 +820,15 @@ let prevPrice = null;
 
 // FETCH: CoinGecko + Kraken (CORS destekli)
 async function fetchTicker() {
-  const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_high_24h=true&include_low_24h=true');
+  const r = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin');
   const d = await r.json();
-  const b = d.bitcoin;
+  const b = d[0];
   return {
-    lastPrice: b.usd,
-    priceChangePercent: b.usd_24h_change,
-    quoteVolume: b.usd_24h_vol,
-    highPrice: b.usd_24h_high,
-    lowPrice: b.usd_24h_low,
+    lastPrice: b.current_price,
+    priceChangePercent: b.price_change_percentage_24h,
+    quoteVolume: b.total_volume,
+    highPrice: b.high_24h,
+    lowPrice: b.low_24h,
   };
 }
 
@@ -926,6 +1130,9 @@ async function update() {
     // Sparkline
     drawSparkline(priceHistory);
 
+    // Run simulation step
+    runSimStep(price, probs.bull);
+
     // Hide loading
     document.getElementById('loading').style.display = 'none';
 
@@ -933,6 +1140,307 @@ async function update() {
     console.error('Veri çekme hatası:', err);
   }
 }
+
+
+// ─── SIMULATION ────────────────────────────────────────────────────────────
+let simRunning = false;
+let simInitial = 1000;
+let simBalance = 1000;
+let simBtcHeld = 0;
+let simEntryPrice = 0;
+let simTradeCount = 0;
+let simWins = 0;
+let simLosses = 0;
+let simHistory = [];
+let simPosition = null;
+let simDurationMs = 15 * 60 * 1000; // default 15 min
+let simDurationLabel = '15 DAKİKA';
+let simEndTime = null;
+let simTimerInterval = null;
+let simSelectedDur = null;
+
+function setAmt(v) { document.getElementById('simAmount').value = v; }
+
+function setDur(minutes, label) {
+  simDurationMs = minutes * 60 * 1000;
+  simDurationLabel = label;
+  document.querySelectorAll('.dur-btn').forEach(b => {
+    b.style.background = 'rgba(255,255,255,0.03)';
+    b.style.color = 'var(--dim)';
+    b.style.borderColor = 'var(--border)';
+  });
+  const btn = document.getElementById('dur-' + minutes);
+  if (btn) {
+    btn.style.background = 'rgba(0,170,255,0.15)';
+    btn.style.color = 'var(--blue)';
+    btn.style.borderColor = 'rgba(0,170,255,0.4)';
+  }
+  simSelectedDur = minutes;
+}
+
+function startSim() {
+  if (simRunning) return;
+  const amt = parseFloat(document.getElementById('simAmount').value);
+  if (!amt || amt < 10) { alert('Lütfen geçerli bir tutar girin (min $10)'); return; }
+  if (!simSelectedDur) { alert('Lütfen bir süre seçin'); return; }
+
+  simInitial = amt;
+  simBalance = amt;
+  simBtcHeld = 0;
+  simEntryPrice = 0;
+  simTradeCount = 0;
+  simWins = 0;
+  simLosses = 0;
+  simHistory = [amt];
+  simPosition = null;
+  simRunning = true;
+  simEndTime = Date.now() + simDurationMs;
+
+  document.getElementById('simStatus').textContent = '● ÇALIŞIYOR';
+  document.getElementById('simStatus').className = 'signal-badge bull';
+  document.getElementById('simStart').textContent = '$' + amt.toLocaleString();
+  document.getElementById('simBalance').textContent = '$' + amt.toLocaleString();
+  document.getElementById('simResult').style.display = 'none';
+  document.getElementById('simTimerBox').style.display = 'block';
+  document.getElementById('simStartBtn').disabled = true;
+  document.getElementById('simStartBtn').style.opacity = '0.4';
+  document.getElementById('tradeLog').innerHTML = '';
+
+  // Start timer
+  clearInterval(simTimerInterval);
+  simTimerInterval = setInterval(updateSimTimer, 1000);
+  updateSimTimer();
+}
+
+function updateSimTimer() {
+  if (!simEndTime) return;
+  const remaining = simEndTime - Date.now();
+  if (remaining <= 0) {
+    clearInterval(simTimerInterval);
+    endSim();
+    return;
+  }
+  const totalSecs = Math.floor(remaining / 1000);
+  const h = Math.floor(totalSecs / 3600);
+  const m = Math.floor((totalSecs % 3600) / 60);
+  const s = totalSecs % 60;
+  const timeStr = h > 0
+    ? h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0')
+    : String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  document.getElementById('simTimer').textContent = timeStr;
+  const pct = (remaining / simDurationMs) * 100;
+  document.getElementById('simTimerBar').style.width = pct + '%';
+}
+
+function endSim() {
+  simRunning = false;
+  clearInterval(simTimerInterval);
+
+  // Close any open position at current price
+  if (simPosition === 'long' && currentPrice) {
+    const saleVal = simBtcHeld * currentPrice;
+    const tradePnl = saleVal - (simBtcHeld * simEntryPrice);
+    simBalance = simBalance * 0.05 + saleVal;
+    if (tradePnl > 0) simWins++; else simLosses++;
+    simTradeCount++;
+    addTradeLog('SAT (KAPANIŞ)', currentPrice, saleVal, new Date().toLocaleTimeString('tr-TR'), tradePnl);
+    simBtcHeld = 0;
+    simPosition = null;
+  }
+
+  const pnl = simBalance - simInitial;
+  const pnlPct = (pnl / simInitial) * 100;
+  const isProfit = pnl >= 0;
+
+  document.getElementById('simStatus').textContent = 'TAMAMLANDI';
+  document.getElementById('simStatus').className = 'signal-badge ' + (isProfit ? 'bull' : 'bear');
+  document.getElementById('simTimer').textContent = '00:00';
+  document.getElementById('simTimerBar').style.width = '0%';
+  document.getElementById('simStartBtn').disabled = false;
+  document.getElementById('simStartBtn').style.opacity = '1';
+
+  // Show result box
+  const resultEl = document.getElementById('simResult');
+  resultEl.style.display = 'block';
+  resultEl.style.background = isProfit ? 'rgba(0,255,136,0.08)' : 'rgba(255,51,102,0.08)';
+  resultEl.style.border = '1px solid ' + (isProfit ? 'rgba(0,255,136,0.3)' : 'rgba(255,51,102,0.3)');
+  resultEl.innerHTML = `
+    <div style="font-size:13px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:8px">${simDurationLabel} SİMÜLASYON SONUCU</div>
+    <div style="font-size:42px;font-weight:700;font-family:'Share Tech Mono',monospace;color:${isProfit ? 'var(--green)' : 'var(--red)'}">
+      ${isProfit ? '+' : ''}${pnlPct.toFixed(2)}%
+    </div>
+    <div style="font-size:22px;font-family:'Share Tech Mono',monospace;color:${isProfit ? 'var(--green)' : 'var(--red)'}">
+      ${isProfit ? '+$' : '-$'}${Math.abs(pnl).toFixed(2)}
+    </div>
+    <div style="margin-top:10px;font-size:13px;color:var(--dim);font-family:'Share Tech Mono',monospace">
+      $${simInitial.toLocaleString()} → $${simBalance.toFixed(2)} · ${simTradeCount} işlem
+    </div>
+  `;
+  updateSimUI();
+}
+
+function resetSim() {
+  simRunning = false;
+  clearInterval(simTimerInterval);
+  simInitial = 1000;
+  simBalance = 1000;
+  simBtcHeld = 0;
+  simEntryPrice = 0;
+  simTradeCount = 0;
+  simWins = 0;
+  simLosses = 0;
+  simHistory = [];
+  simPosition = null;
+  simEndTime = null;
+
+  document.getElementById('simStatus').textContent = 'BEKLEMEDE';
+  document.getElementById('simStatus').className = 'signal-badge neutral';
+  document.getElementById('simStart').textContent = '-';
+  document.getElementById('simBalance').textContent = '-';
+  document.getElementById('simPnl').textContent = '-';
+  document.getElementById('simPnlPct').textContent = '-';
+  document.getElementById('simWins').textContent = '0';
+  document.getElementById('simLosses').textContent = '0';
+  document.getElementById('simTimerBox').style.display = 'none';
+  document.getElementById('simResult').style.display = 'none';
+  document.getElementById('simStartBtn').disabled = false;
+  document.getElementById('simStartBtn').style.opacity = '1';
+  document.getElementById('tradeLog').innerHTML = '';
+  drawPnlChart();
+}
+
+function runSimStep(price, bullProb) {
+  if (!simRunning) return;
+  const now = new Date().toLocaleTimeString('tr-TR');
+
+  if (!simPosition && bullProb >= 62) {
+    simBtcHeld = (simBalance * 0.95) / price;
+    simEntryPrice = price;
+    simPosition = 'long';
+    addTradeLog('AL', price, simBalance * 0.95, now, null);
+  } else if (simPosition === 'long') {
+    const pnlPct = ((price - simEntryPrice) / simEntryPrice) * 100;
+    if (pnlPct >= 1.5 || pnlPct <= -1.0 || bullProb <= 38) {
+      const saleVal = simBtcHeld * price;
+      const tradePnl = saleVal - (simBtcHeld * simEntryPrice);
+      simBalance = simBalance * 0.05 + saleVal;
+      if (tradePnl > 0) simWins++; else simLosses++;
+      simTradeCount++;
+      addTradeLog('SAT', price, saleVal, now, tradePnl);
+      simBtcHeld = 0;
+      simPosition = null;
+    }
+  }
+
+  const totalVal = simPosition ? (simBalance * 0.05 + simBtcHeld * price) : simBalance;
+  simHistory.push(totalVal);
+  if (simHistory.length > 200) simHistory.shift();
+  updateSimUI();
+}
+
+function updateSimUI() {
+  if (!simRunning && simHistory.length === 0) return;
+  const totalVal = simPosition && currentPrice
+    ? (simBalance * 0.05 + simBtcHeld * currentPrice)
+    : simBalance;
+  const pnl = totalVal - simInitial;
+  const pnlPct = (pnl / simInitial) * 100;
+  const isPos = pnl >= 0;
+
+  document.getElementById('simBalance').textContent = '$' + totalVal.toFixed(2);
+  document.getElementById('simBalance').style.color = isPos ? 'var(--green)' : 'var(--red)';
+
+  const pnlEl = document.getElementById('simPnl');
+  pnlEl.textContent = (isPos ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
+  pnlEl.style.color = isPos ? 'var(--green)' : 'var(--red)';
+
+  const pctEl = document.getElementById('simPnlPct');
+  pctEl.textContent = (isPos ? '+' : '') + pnlPct.toFixed(2) + '%';
+  pctEl.style.color = isPos ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('simWins').textContent = simWins;
+  document.getElementById('simLosses').textContent = simLosses;
+  drawPnlChart();
+}
+
+function addTradeLog(type, price, value, time, pnl) {
+  const log = document.getElementById('tradeLog');
+  const isBuy = type.includes('AL');
+  const pnlStr = pnl !== null && pnl !== undefined
+    ? (pnl >= 0 ? ' <span style="color:var(--green)">+$' + pnl.toFixed(2) + '</span>' : ' <span style="color:var(--red)">-$' + Math.abs(pnl).toFixed(2) + '</span>')
+    : '';
+  const div = document.createElement('div');
+  div.className = 'trade-row ' + (isBuy ? 'buy' : 'sell');
+  div.innerHTML = `
+    <span style="font-weight:700">${type}</span>
+    <span>$${parseFloat(price).toLocaleString()}</span>
+    <span style="color:var(--dim)">$${parseFloat(value).toFixed(0)}</span>
+    ${pnlStr}
+    <span style="color:var(--dim);font-size:10px">${time}</span>
+  `;
+  log.insertBefore(div, log.firstChild);
+}
+
+function drawPnlChart() {
+  const canvas = document.getElementById('pnlChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 300;
+  const H = 80;
+  canvas.width = W;
+  canvas.height = H;
+  ctx.clearRect(0, 0, W, H);
+
+  if (simHistory.length < 2) {
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Simülasyon başlatıldığında grafik oluşacak', W/2, H/2);
+    return;
+  }
+
+  const min = Math.min(...simHistory, simInitial * 0.97);
+  const max = Math.max(...simHistory, simInitial * 1.03);
+  const range = max - min || 1;
+  const last = simHistory[simHistory.length - 1];
+  const isUp = last >= simInitial;
+  const color = isUp ? '#00ff88' : '#ff3366';
+
+  // Baseline
+  const baseY = H - ((simInitial - min) / range) * (H - 10) - 5;
+  ctx.beginPath();
+  ctx.moveTo(0, baseY); ctx.lineTo(W, baseY);
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Fill
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, isUp ? 'rgba(0,255,136,0.15)' : 'rgba(255,51,102,0.15)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.beginPath();
+  simHistory.forEach((v, i) => {
+    const x = (i / (simHistory.length - 1)) * W;
+    const y = H - ((v - min) / range) * (H - 10) - 5;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  simHistory.forEach((v, i) => {
+    const x = (i / (simHistory.length - 1)) * W;
+    const y = H - ((v - min) / range) * (H - 10) - 5;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+}
+
 
 // ─── COUNTDOWN ─────────────────────────────────────────────────────────────
 function startCountdown() {
@@ -948,6 +1456,161 @@ function startCountdown() {
   }, 1000);
 }
 
+// ─── WEBSOCKET REAL-TIME ───────────────────────────────────────────────────
+let ws = null;
+let wsReconnectTimer = null;
+let lastFullUpdate = 0;
+let latestWsPrice = null;
+
+function connectWebSocket() {
+  if (ws) { try { ws.close(); } catch(_) {} }
+  try {
+    ws = new WebSocket('wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/btcusdt@depth5@100ms');
+    ws.onopen = () => {
+      console.log('WS connected');
+      document.getElementById('countdown').textContent = 'CANLI';
+      document.getElementById('countdown').style.color = 'var(--green)';
+    };
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (!msg.data) return;
+        const stream = msg.stream;
+
+        if (stream.includes('@ticker')) {
+          const t = msg.data;
+          const price = parseFloat(t.c);
+          const change24 = parseFloat(t.P);
+          const high24 = parseFloat(t.h);
+          const low24 = parseFloat(t.l);
+          const vol24 = parseFloat(t.q);
+
+          latestWsPrice = price;
+
+          // Update price display instantly
+          const priceEl = document.getElementById('price');
+          prevPrice = currentPrice;
+          currentPrice = price;
+          priceEl.textContent = '$' + fmt(price);
+          priceEl.classList.add('flash');
+          setTimeout(() => priceEl.classList.remove('flash'), 200);
+          if (prevPrice !== null) {
+            priceEl.style.color = price > prevPrice ? 'var(--green)' : price < prevPrice ? 'var(--red)' : '#fff';
+          }
+
+          const changeEl = document.getElementById('change24h');
+          changeEl.textContent = (change24 >= 0 ? '+' : '') + change24.toFixed(2) + '%';
+          changeEl.className = 'price-change ' + (change24 >= 0 ? 'up' : 'down');
+
+          document.getElementById('high24h').textContent = '$' + fmt(high24);
+          document.getElementById('low24h').textContent = '$' + fmt(low24);
+          document.getElementById('volume').textContent = '$' + fmtVol(vol24);
+          document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('tr-TR');
+
+          // Price history
+          priceHistory.push(price);
+          if (priceHistory.length > 50) priceHistory.shift();
+          drawSparkline(priceHistory);
+
+          // Run sim step on every tick
+          if (window._lastProbs) runSimStep(price, window._lastProbs.bull);
+        }
+
+        if (stream.includes('@depth')) {
+          const ob = msg.data;
+          if (ob.bids && ob.asks) renderOrderBook(ob.bids, ob.asks);
+        }
+
+      } catch(err) { console.error('WS parse error', err); }
+    };
+    ws.onerror = () => console.warn('WS error');
+    ws.onclose = () => {
+      document.getElementById('countdown').textContent = 'YENİDEN BAĞLANIYOR...';
+      document.getElementById('countdown').style.color = 'var(--yellow)';
+      wsReconnectTimer = setTimeout(connectWebSocket, 3000);
+    };
+  } catch(e) {
+    console.warn('WS failed, falling back to polling');
+    schedulePolling();
+  }
+}
+
+// Full analysis update (indicators, signals) every 15s
+async function fullAnalysisUpdate() {
+  try {
+    const [ticker, klines] = await Promise.all([fetchTicker(), fetchKlines()]);
+    const closes = klines.map(k => k.close);
+    const volumes = klines.map(k => k.volume);
+
+    const price = latestWsPrice || ticker.lastPrice;
+    const change24 = parseFloat(ticker.priceChangePercent);
+
+    // If WS not active, update price from REST too
+    if (!ws || ws.readyState !== 1) {
+      currentPrice = price;
+      document.getElementById('price').textContent = '$' + fmt(price);
+      document.getElementById('change24h').textContent = (change24 >= 0 ? '+' : '') + change24.toFixed(2) + '%';
+      document.getElementById('change24h').className = 'price-change ' + (change24 >= 0 ? 'up' : 'down');
+      document.getElementById('high24h').textContent = '$' + fmt(ticker.highPrice);
+      document.getElementById('low24h').textContent = '$' + fmt(ticker.lowPrice);
+      document.getElementById('volume').textContent = '$' + fmtVol(ticker.quoteVolume);
+      document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('tr-TR');
+    } else {
+      // Still update high/low from REST (more reliable)
+      document.getElementById('high24h').textContent = '$' + fmt(ticker.highPrice);
+      document.getElementById('low24h').textContent = '$' + fmt(ticker.lowPrice);
+    }
+
+    const rsi = calcRSI(closes);
+    const { macd } = calcMACD(closes);
+    const momentum = calcMomentum(closes);
+    const avgVol = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
+    const curVol = volumes[volumes.length - 1];
+    const volumeRatio = curVol / avgVol;
+
+    // Fetch orderbook for ob ratio
+    const ob = await fetchOrderBook();
+    const { ratio: obRatio } = analyzeOrderBook(ob.bids, ob.asks);
+
+    const probs = calcProbability({ rsi, macd, momentum, obRatio, priceChange: change24, volumeRatio });
+    window._lastProbs = probs;
+
+    // Update probabilities
+    document.getElementById('bullProb').textContent = probs.bull + '%';
+    document.getElementById('bearProb').textContent = probs.bear + '%';
+    document.getElementById('bullBar').style.width = probs.bull + '%';
+    document.getElementById('bearBar').style.width = probs.bear + '%';
+
+    const badge = document.getElementById('signalBadge');
+    if (probs.bull >= 60) { badge.textContent = '▲ BOĞA SİNYALİ'; badge.className = 'signal-badge bull'; }
+    else if (probs.bear >= 60) { badge.textContent = '▼ AYI SİNYALİ'; badge.className = 'signal-badge bear'; }
+    else { badge.textContent = '◈ NÖTR'; badge.className = 'signal-badge neutral'; }
+
+    const rsiClass = rsi < 30 ? 'bull' : rsi > 70 ? 'bear' : 'neutral';
+    setIndicator('rsi-val', rsi.toFixed(1), 'rsi-sig', rsi < 30 ? 'AŞIRI SATIM' : rsi > 70 ? 'AŞIRI ALIM' : 'NÖTR', rsiClass);
+    setIndicator('macd-val', macd.toFixed(0), 'macd-sig', macd > 0 ? 'POZİTİF' : 'NEGATİF', macd > 0 ? 'bull' : 'bear');
+    setIndicator('bb-val', momentum.toFixed(2) + '%', 'bb-sig', momentum > 0 ? 'YÜKSELİŞ' : 'DÜŞÜŞ', momentum > 0 ? 'bull' : 'bear');
+    const volClass = volumeRatio > 1.2 ? 'bull' : volumeRatio < 0.8 ? 'bear' : 'neutral';
+    setIndicator('vol-val', volumeRatio.toFixed(2) + 'x', 'vol-sig', volumeRatio > 1.2 ? 'YÜKSEK' : volumeRatio < 0.8 ? 'DÜŞÜK' : 'NORMAL', volClass);
+    const obClass = obRatio > 0.55 ? 'bull' : obRatio < 0.45 ? 'bear' : 'neutral';
+    setIndicator('ob-val', (obRatio * 100).toFixed(0) + '%', 'ob-sig', obRatio > 0.55 ? 'ALIŞ BASKISI' : obRatio < 0.45 ? 'SATIŞ BASKISI' : 'DENGELİ', obClass);
+    setIndicator('trend-val', (change24 >= 0 ? '+' : '') + change24.toFixed(2) + '%', 'trend-sig', change24 > 1 ? 'GÜÇLÜ ▲' : change24 < -1 ? 'GÜÇLÜ ▼' : 'ZAYIF', change24 > 0 ? 'bull' : 'bear');
+
+    document.getElementById('loading').style.display = 'none';
+
+  } catch(err) {
+    console.error('Analysis update error:', err);
+  }
+  setTimeout(fullAnalysisUpdate, 15000);
+}
+
+// Fallback polling
+function schedulePolling() {
+  update().then(() => {
+    setTimeout(schedulePolling, 5000);
+  });
+}
+
 function scheduleUpdate() {
   update().then(() => {
     startCountdown();
@@ -956,7 +1619,8 @@ function scheduleUpdate() {
 }
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
-scheduleUpdate();
+connectWebSocket();
+fullAnalysisUpdate();
 </script>
 </body>
 </html>
