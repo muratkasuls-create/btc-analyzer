@@ -658,6 +658,12 @@
       </div>
     </div>
 
+    <!-- Smart Money Signals -->
+    <div id="smartSignals" style="margin-bottom:18px;display:none">
+      <div class="signal-title" style="margin-bottom:10px">// SMART MONEY SİNYALLERİ</div>
+      <div id="signalsList"></div>
+    </div>
+
     <!-- Indicators -->
     <div class="indicators">
       <div class="indicator" id="ind-rsi">
@@ -1211,6 +1217,7 @@ function renderSmartSignals(signals) {
   if (!signals || signals.length === 0) return;
   const box = document.getElementById('smartSignals');
   const list = document.getElementById('signalsList');
+  if (!box || !list) return;
   box.style.display = 'block';
   list.innerHTML = signals.map(s => `
     <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;
@@ -2099,6 +2106,7 @@ function renderFearGreed(value) {
   const label = document.getElementById('fgLabel');
   const badge = document.getElementById('fgBadge');
   const marker = document.getElementById('fgMarker');
+  if (!el || !label || !badge) return;
 
   el.textContent = value;
   marker.style.left = value + '%';
