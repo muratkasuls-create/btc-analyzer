@@ -587,7 +587,7 @@
 </head>
 <body>
 
-<div class="loading" id="loading">
+<div class="loading" id="loading" style="display:none">
   <div class="loading-spinner"></div>
   <p>BORSA VERİLERİ YÜKLENİYOR...</p>
 </div>
@@ -2498,29 +2498,6 @@ function scheduleUpdate() {
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
 
-// Force hide loading after 5s no matter what (mobile fallback)
-setTimeout(() => {
-  const l = document.getElementById('loading');
-  if (l) l.style.display = 'none';
-}, 5000);
-
-// Also hide loading as soon as first price arrives
-async function initLoad() {
-  try {
-    const r = await fetch(api('price'));
-    const d = await r.json();
-    if (d.price) {
-      currentPrice = parseFloat(d.price);
-      document.getElementById('price').textContent = '$' + fmt(currentPrice);
-      document.getElementById('loading').style.display = 'none';
-    }
-  } catch(e) {
-    console.warn('Init price fetch failed:', e);
-  }
-  document.getElementById('loading').style.display = 'none';
-}
-
-initLoad();
 connectWebSocket();
 fullAnalysisUpdate();
 </script>
