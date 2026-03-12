@@ -1456,9 +1456,9 @@ function renderOrderBook(bids, asks) {
   if (!bids || !asks || !bids.length || !asks.length) return;
   const N = 7;
 
-  // Parse all quantities
-  const parsedBids = bids.slice(0, N).map(b => ({ p: parseFloat(b[0]), q: parseFloat(b[1]) }));
-  const parsedAsks = asks.slice(0, N).map(a => ({ p: parseFloat(a[0]), q: parseFloat(a[1]) }));
+  // Parse and filter dust levels
+  const parsedBids = bids.slice(0, N*2).map(b => ({ p: parseFloat(b[0]), q: parseFloat(b[1]) })).filter(b => b.q >= 0.001).slice(0, N);
+  const parsedAsks = asks.slice(0, N*2).map(a => ({ p: parseFloat(a[0]), q: parseFloat(a[1]) })).filter(a => a.q >= 0.001).slice(0, N);
 
   const maxBidQ = Math.max(...parsedBids.map(b => b.q)) || 1;
   const maxAskQ = Math.max(...parsedAsks.map(a => a.q)) || 1;
