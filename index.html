@@ -1076,16 +1076,16 @@ function calcProbability({ rsi, macd, momentum, obRatio, priceChange, volumeRati
   let signals = [];
 
   // ── 1. RSI ──────────────────────────────────────────────────────────────
-  if (rsi < 25) { score += 18; signals.push({name:'RSI', note:'AŞIRI SATIM - Geri dönüş beklentisi', bull:true}); }
-  else if (rsi < 35) { score += 10; signals.push({name:'RSI', note:'Oversold bölgesi', bull:true}); }
-  else if (rsi > 75) { score -= 18; signals.push({name:'RSI', note:'AŞIRI ALIM - Düzeltme riski', bull:false}); }
-  else if (rsi > 65) { score -= 10; signals.push({name:'RSI', note:'Overbought bölgesi', bull:false}); }
+  if (rsi < 25) { score += 18; signals.push({name:'RSI', note:"AŞIRI SATIM - Geri dönüş beklentisi", bull:true}); }
+  else if (rsi < 35) { score += 10; signals.push({name:'RSI', note:"Oversold bölgesi", bull:true}); }
+  else if (rsi > 75) { score -= 18; signals.push({name:'RSI', note:"AŞIRI ALIM - Düzeltme riski", bull:false}); }
+  else if (rsi > 65) { score -= 10; signals.push({name:'RSI', note:"Overbought bölgesi", bull:false}); }
 
   // ── 2. MACD ─────────────────────────────────────────────────────────────
-  if (macd > 50) { score += 12; signals.push({name:'MACD', note:'Güçlü pozitif momentum', bull:true}); }
-  else if (macd > 0) { score += 6; signals.push({name:'MACD', note:'Pozitif momentum', bull:true}); }
-  else if (macd < -50) { score -= 12; signals.push({name:'MACD', note:'Güçlü negatif momentum', bull:false}); }
-  else { score -= 6; signals.push({name:'MACD', note:'Negatif momentum', bull:false}); }
+  if (macd > 50) { score += 12; signals.push({name:'MACD', note:"Güçlü pozitif momentum", bull:true}); }
+  else if (macd > 0) { score += 6; signals.push({name:'MACD', note:"Pozitif momentum", bull:true}); }
+  else if (macd < -50) { score -= 12; signals.push({name:'MACD', note:"Güçlü negatif momentum", bull:false}); }
+  else { score -= 6; signals.push({name:'MACD', note:"Negatif momentum", bull:false}); }
 
   // ── 3. MOMENTUM ─────────────────────────────────────────────────────────
   if (momentum > 1.5) { score += 10; }
@@ -1094,44 +1094,44 @@ function calcProbability({ rsi, macd, momentum, obRatio, priceChange, volumeRati
   else if (momentum < -0.3) { score -= 5; }
 
   // ── 4. ORDER BOOK BASKISI ────────────────────────────────────────────────
-  if (obRatio > 0.65) { score += 10; signals.push({name:'OB', note:'Güçlü alış baskısı', bull:true}); }
+  if (obRatio > 0.65) { score += 10; signals.push({name:'OB', note:"Güçlü alış baskısı", bull:true}); }
   else if (obRatio > 0.55) { score += 5; }
-  else if (obRatio < 0.35) { score -= 10; signals.push({name:'OB', note:'Güçlü satış baskısı', bull:false}); }
+  else if (obRatio < 0.35) { score -= 10; signals.push({name:'OB', note:"Güçlü satış baskısı", bull:false}); }
   else if (obRatio < 0.45) { score -= 5; }
 
   // ── 5. HACİM ────────────────────────────────────────────────────────────
-  if (volumeRatio > 2.0) { score += 8; signals.push({name:'HACİM', note:'Anormal yüksek hacim - Büyük oyuncu hareketi', bull: momentum > 0}); }
+  if (volumeRatio > 2.0) { score += 8; signals.push({name:'HACİM', note:"Anormal yüksek hacim - Büyük oyuncu hareketi", bull: momentum > 0}); }
   else if (volumeRatio > 1.3) { score += 4; }
-  else if (volumeRatio < 0.5) { score -= 6; signals.push({name:'HACİM', note:'Düşük hacim - Zayıf hareket', bull:false}); }
+  else if (volumeRatio < 0.5) { score -= 6; signals.push({name:'HACİM', note:"Düşük hacim - Zayıf hareket", bull:false}); }
 
   // ── 6. MARKET MAKER / SMART MONEY ANALİZİ ───────────────────────────────
   // Teori: Kalabalık long → MM short squeeze yapar | Kalabalık short → MM long squeeze yapar
   if (lsRatio > 1.8) {
     // Aşırı long kalabalık → MM SHORT SQUEEZE riski
     score -= 15;
-    signals.push({name:'⚠ MM UYARI', note:'Aşırı long kalabalık! Market maker SHORT squeeze yapabilir', bull:false});
+    signals.push({name:'⚠ MM UYARI', note:"Asiri long kalabali! Market maker SHORT squeeze yapabilir", bull:false});
   } else if (lsRatio > 1.4) {
     score -= 8;
-    signals.push({name:'MM', note:'Long kalabalığı - Dikkat', bull:false});
+    signals.push({name:'MM', note:"Long kalabali - Dikkat", bull:false});
   } else if (lsRatio < 0.6) {
     // Aşırı short kalabalık → MM LONG SQUEEZE riski
     score += 15;
-    signals.push({name:'⚠ MM FIRSAT', note:'Aşırı short kalabalık! Market maker LONG squeeze yapabilir', bull:true});
+    signals.push({name:'⚠ MM FIRSAT', note:"Asiri short kalabali! Market maker LONG squeeze yapabilir", bull:true});
   } else if (lsRatio < 0.75) {
     score += 8;
-    signals.push({name:'MM', note:'Short kalabalığı - Yükseliş fırsatı', bull:true});
+    signals.push({name:'MM', note:"Short kalabali - Yukselis firsati", bull:true});
   }
 
   // ── 7. FUNDING RATE ─────────────────────────────────────────────────────
   // Pozitif funding = longlar short'lara ödüyor = piyasa aşırı iyimser
   if (funding > 0.05) {
     score -= 12;
-    signals.push({name:'FUNDING', note:'Yüksek pozitif funding - Long'lar fazla, düzeltme riski', bull:false});
+    signals.push({name:'FUNDING', note:"Yüksek pozitif funding - Longlar fazla, duzeltme riski", bull:false});
   } else if (funding > 0.02) {
     score -= 6;
   } else if (funding < -0.05) {
     score += 12;
-    signals.push({name:'FUNDING', note:'Negatif funding - Short'lar ödüyor, yükseliş sinyali', bull:true});
+    signals.push({name:'FUNDING', note:"Negatif funding - Shortlar oduyor, yukselis sinyali", bull:true});
   } else if (funding < -0.02) {
     score += 6;
   }
@@ -1146,11 +1146,11 @@ function calcProbability({ rsi, macd, momentum, obRatio, priceChange, volumeRati
   // Aşırı tek yönlü piyasa her zaman tersine döner
   if (rsi > 80 && lsRatio > 1.5 && funding > 0.03) {
     score -= 20;
-    signals.push({name:'⛔ AŞIRI ALIM', note:'RSI + Long kalabalık + Yüksek funding = Güçlü düşüş sinyali', bull:false});
+    signals.push({name:'⛔ AŞIRI ALIM', note:"RSI + Long kalabalık + Yüksek funding = Güçlü düşüş sinyali", bull:false});
   }
   if (rsi < 20 && lsRatio < 0.7 && funding < -0.03) {
     score += 20;
-    signals.push({name:'🚀 AŞIRI SATIM', note:'RSI + Short kalabalık + Negatif funding = Güçlü yükseliş sinyali', bull:true});
+    signals.push({name:'🚀 AŞIRI SATIM', note:"RSI + Short kalabalık + Negatif funding = Güçlü yükseliş sinyali", bull:true});
   }
 
   // ── 10. KÜÇÜK RASTGELELİK ───────────────────────────────────────────────
