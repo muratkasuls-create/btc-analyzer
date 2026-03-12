@@ -251,7 +251,8 @@ body::before {
   flex-direction: column;
   gap: 5px;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ── PROBABILITY BARS ─────────────────────────────────── */
@@ -1074,9 +1075,15 @@ body::before {
     <div class="panel" style="flex:0 0 auto">
       <div class="panel-title">// EMİR DEFTERİ</div>
       <div class="panel-body" style="padding:6px 8px">
-        <div style="font-size:9px;color:var(--red);font-family:'Share Tech Mono',monospace;margin-bottom:4px">▼ SATIŞ (ASK)</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:9px;color:var(--red);font-family:'Share Tech Mono',monospace">▼ SATIŞ (ASK)</span>
+          <span style="font-size:9px;color:var(--dim);font-family:'Share Tech Mono',monospace" id="askTotal"></span>
+        </div>
         <div id="askOrders"></div>
-        <div style="font-size:9px;color:var(--green);font-family:'Share Tech Mono',monospace;margin:6px 0 4px">▲ ALIŞ (BID)</div>
+        <div style="display:flex;justify-content:space-between;margin:5px 0 3px">
+          <span style="font-size:9px;color:var(--green);font-family:'Share Tech Mono',monospace">▲ ALIŞ (BID)</span>
+          <span style="font-size:9px;color:var(--dim);font-family:'Share Tech Mono',monospace" id="bidTotal"></span>
+        </div>
         <div id="bidOrders"></div>
       </div>
     </div>
@@ -1150,7 +1157,7 @@ body::before {
     </div>
 
     <!-- Simülasyon -->
-    <div class="panel" style="flex:1;min-height:0">
+    <div class="panel" style="flex:1;min-height:200px">
       <div class="panel-title">// SİMÜLASYON BOTU <span id="simStatusBadge" style="float:right;color:var(--dim)">BEKLEMEDE</span></div>
       <div class="panel-body">
 
@@ -1447,33 +1454,45 @@ function setIndicator(id, value, sigId, signal, cls) {
 
 function renderOrderBook(bids, asks) {
   if (!bids || !asks || !bids.length || !asks.length) return;
-  const N = 6;
-  const maxBid = Math.max(...bids.slice(0, N).map(b => parseFloat(b[1])));
-  const maxAsk = Math.max(...asks.slice(0, N).map(a => parseFloat(a[1])));
+  const N = 7;
 
-  const fmtQty = q => {
-    const n = parseFloat(q);
-    return n >= 1 ? n.toFixed(2) + ' BTC' : (n * 1000).toFixed(1) + ' mBTC';
-  };
-  const fmtPx = p => '$' + parseFloat(p).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  // Parse all quantities
+  const parsedBids = bids.slice(0, N).map(b => ({ p: parseFloat(b[0]), q: parseFloat(b[1]) }));
+  const parsedAsks = asks.slice(0, N).map(a => ({ p: parseFloat(a[0]), q: parseFloat(a[1]) }));
+
+  const maxBidQ = Math.max(...parsedBids.map(b => b.q)) || 1;
+  const maxAskQ = Math.max(...parsedAsks.map(a => a.q)) || 1;
+
+  const totalBidQ = parsedBids.reduce((s, b) => s + b.q, 0);
+  const totalAskQ = parsedAsks.reduce((s, a) => s + a.q, 0);
+
+  const fmtQty = q => q >= 0.01 ? q.toFixed(3) + '₿' : (q * 1000).toFixed(2) + 'm₿';
+  const fmtPx  = p => '$' + p.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const fmtTotal = q => q >= 1 ? q.toFixed(2) + ' BTC toplam' : (q*1000).toFixed(1) + ' mBTC toplam';
+
+  // Ask total
+  const askTotalEl = document.getElementById('askTotal');
+  if (askTotalEl) { askTotalEl.textContent = fmtTotal(totalAskQ); }
+  const bidTotalEl = document.getElementById('bidTotal');
+  if (bidTotalEl) { bidTotalEl.textContent = fmtTotal(totalBidQ); }
 
   const asksEl = document.getElementById('askOrders');
-  if (asksEl) asksEl.innerHTML = asks.slice(0, N).reverse().map(a => {
-    const pct = Math.max(4, (parseFloat(a[1]) / maxAsk * 100)).toFixed(0);
-    return `<div class="ob-row ob-ask">
-      <span style="color:var(--red);min-width:80px;font-size:11px">${fmtPx(a[0])}</span>
-      <div class="ob-bar-wrap"><div class="ob-bar" style="width:${pct}%;background:rgba(255,51,102,0.5)"></div></div>
-      <span style="color:var(--dim);min-width:70px;text-align:right;font-size:10px">${fmtQty(a[1])}</span>
+  if (asksEl) asksEl.innerHTML = parsedAsks.reverse().map(a => {
+    const pct = Math.max(3, (a.q / maxAskQ * 100)).toFixed(0);
+    return `<div class="ob-row ob-ask" style="position:relative;padding:2px 4px">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:${pct}%;background:rgba(255,51,102,0.12);border-radius:3px"></div>
+      <span style="position:relative;color:var(--red);font-size:10px;min-width:78px">${fmtPx(a.p)}</span>
+      <span style="position:relative;color:var(--dim);font-size:10px;text-align:right;flex:1">${fmtQty(a.q)}</span>
     </div>`;
   }).join('');
 
   const bidsEl = document.getElementById('bidOrders');
-  if (bidsEl) bidsEl.innerHTML = bids.slice(0, N).map(b => {
-    const pct = Math.max(4, (parseFloat(b[1]) / maxBid * 100)).toFixed(0);
-    return `<div class="ob-row ob-bid">
-      <span style="color:var(--green);min-width:80px;font-size:11px">${fmtPx(b[0])}</span>
-      <div class="ob-bar-wrap"><div class="ob-bar" style="width:${pct}%;background:rgba(0,255,136,0.5)"></div></div>
-      <span style="color:var(--dim);min-width:70px;text-align:right;font-size:10px">${fmtQty(b[1])}</span>
+  if (bidsEl) bidsEl.innerHTML = parsedBids.map(b => {
+    const pct = Math.max(3, (b.q / maxBidQ * 100)).toFixed(0);
+    return `<div class="ob-row ob-bid" style="position:relative;padding:2px 4px">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:${pct}%;background:rgba(0,255,136,0.12);border-radius:3px"></div>
+      <span style="position:relative;color:var(--green);font-size:10px;min-width:78px">${fmtPx(b.p)}</span>
+      <span style="position:relative;color:var(--dim);font-size:10px;text-align:right;flex:1">${fmtQty(b.q)}</span>
     </div>`;
   }).join('');
 }
@@ -2497,8 +2516,9 @@ function renderCorrelations(domValue) {
 
   // DXY - inverse correlation with BTC
   // Estimate: use a simple heuristic based on recent BTC change
-  const btcChange = currentPrice ? ((priceHistory[priceHistory.length-1] - priceHistory[0]) / priceHistory[0] * 100) : 0;
-  const dxyEst = -btcChange * 0.3; // rough inverse
+  const ph = priceHistory || [];
+  const btcChange = (ph.length >= 2 && ph[0]) ? ((ph[ph.length-1] - ph[0]) / ph[0] * 100) : 0;
+  const dxyEst = isFinite(btcChange) ? (-btcChange * 0.3) : 0;
 
   const dxyEl = document.getElementById('dxyVal');
   const dxyNote = document.getElementById('dxyNote');
@@ -2936,7 +2956,10 @@ function connectWebSocket() {
         }
         if (stream.includes('@depth')) {
           const ob = msg.data;
-          if (ob.bids && ob.asks) renderOrderBook(ob.bids, ob.asks);
+          // Binance depth stream uses b/a OR bids/asks
+          const bids = ob.b || ob.bids;
+          const asks = ob.a || ob.asks;
+          if (bids && asks && bids.length && asks.length) renderOrderBook(bids, asks);
         }
       } catch(err) { console.error('WS parse error', err); }
     };
