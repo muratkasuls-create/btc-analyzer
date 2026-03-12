@@ -1557,7 +1557,7 @@ function endSim() {
   if (simPosition === 'long' && currentPrice) {
     const saleVal = simBtcHeld * currentPrice;
     const tradePnl = saleVal - (simBtcHeld * simEntryPrice);
-    simBalance = simBalance * 0.05 + saleVal;
+    simBalance = simBalance - (simBtcHeld * simEntryPrice) + saleVal;
     if (tradePnl > 0) simWins++; else simLosses++;
     simTradeCount++;
     addTradeLog('SAT (KAPANIŞ)', currentPrice, saleVal, new Date().toLocaleTimeString('tr-TR'), tradePnl);
@@ -1758,7 +1758,14 @@ function runSimStep(price, bullProb) {
     }
   }
 
-  const tv = simPosition ? (simBalance * (1 - simPositionPct) + simBtcHeld * price) : simBalance;
+  // Total = cash balance + unrealized PnL on open position
+  let tv;
+  if (simPosition && simBtcHeld > 0) {
+    const unrealized = simBtcHeld * (price - simEntryPrice);
+    tv = simBalance + unrealized;
+  } else {
+    tv = simBalance;
+  }
   simHistory.push(tv);
   if (simHistory.length > 500) simHistory.shift();
   updateSimUI();
