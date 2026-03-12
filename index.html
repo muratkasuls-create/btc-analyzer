@@ -1340,18 +1340,20 @@ function fmtVol(n) {
 function setIndicator(id, value, sigId, signal, cls) {
   const el = document.getElementById(id);
   const sigEl = document.getElementById(sigId);
-  const card = el.closest('.indicator');
+  if (!el || !sigEl) return;
+  const card = el.closest('.ind-item') || el.closest('.indicator');
   el.textContent = value;
   sigEl.textContent = signal;
-  sigEl.className = 'ind-signal ' + cls;
-  card.className = 'indicator ' + cls;
+  sigEl.className = 'ind-sig ' + cls;
+  if (!card) return;
+  card.className = 'ind-item ' + cls;
 }
 
 function renderOrderBook(bids, asks) {
   const maxBid = Math.max(...bids.slice(0, 6).map(b => parseFloat(b[1])));
   const maxAsk = Math.max(...asks.slice(0, 6).map(a => parseFloat(a[1])));
 
-  const asksEl = document.getElementById('asks-list');
+  const asksEl = document.getElementById('askOrders');
   asksEl.innerHTML = asks.slice(0, 6).reverse().map(a => {
     const pct = (parseFloat(a[1]) / maxAsk * 100).toFixed(0);
     return `<div class="ob-row ask">
@@ -1361,7 +1363,7 @@ function renderOrderBook(bids, asks) {
     </div>`;
   }).join('');
 
-  const bidsEl = document.getElementById('bids-list');
+  const bidsEl = document.getElementById('bidOrders');
   bidsEl.innerHTML = bids.slice(0, 6).map(b => {
     const pct = (parseFloat(b[1]) / maxBid * 100).toFixed(0);
     return `<div class="ob-row bid">
@@ -1413,33 +1415,45 @@ function updateLongShort(data, obRatio) {
     document.getElementById('openInterest').textContent = 'N/A';
   }
 
-  document.getElementById('longPct').textContent = longPct.toFixed(1) + '%';
-  document.getElementById('shortPct').textContent = shortPct.toFixed(1) + '%';
-  document.getElementById('lsBar').style.width = longPct + '%';
+  const longPctEl  = document.getElementById('longPct');
+  const shortPctEl = document.getElementById('shortPct');
+  const longBarEl  = document.getElementById('longBar');
+  const shortBarEl = document.getElementById('shortBar');
+  const ratioEl    = document.getElementById('lsRatio');
 
-  const ratioEl = document.getElementById('lsRatio');
-  ratioEl.textContent = ratio.toFixed(2);
-  ratioEl.style.color = ratio > 1 ? 'var(--green)' : 'var(--red)';
+  if (longPctEl)  longPctEl.textContent  = longPct.toFixed(1) + '%';
+  if (shortPctEl) shortPctEl.textContent = shortPct.toFixed(1) + '%';
+  if (longBarEl)  longBarEl.style.width  = longPct + '%';
+  if (shortBarEl) shortBarEl.style.width = shortPct + '%';
 
-  // Badge
-  const badge = document.getElementById('lsBadge');
-  if (longPct > 60) { badge.textContent = '▲ LONG AĞIRLIKLI'; badge.className = 'signal-badge bull'; }
-  else if (shortPct > 60) { badge.textContent = '▼ SHORT AĞIRLIKLI'; badge.className = 'signal-badge bear'; }
-  else { badge.textContent = '◈ DENGELİ'; badge.className = 'signal-badge neutral'; }
+  if (ratioEl) {
+    ratioEl.textContent  = ratio.toFixed(2);
+    ratioEl.style.color  = ratio > 1 ? 'var(--green)' : 'var(--red)';
+  }
 
-  // Update long/short sizes if price known
+  // Header signal badge
+  const badge = document.getElementById('signalBadge');
+  if (badge) {
+    if (longPct > 60)      { badge.textContent = '▲ LONG AĞIRLIKLI'; badge.className = 'signal-badge bull'; }
+    else if (shortPct > 60){ badge.textContent = '▼ SHORT AĞIRLIKLI'; badge.className = 'signal-badge bear'; }
+    else                   { badge.textContent = '◈ DENGELİ';         badge.className = 'signal-badge neutral'; }
+  }
+
+  // USD pozisyon büyüklükleri
   if (currentPrice && data && data.oi) {
-    const longVal = (longPct/100) * data.oi * currentPrice;
-    const shortVal = (shortPct/100) * data.oi * currentPrice;
-    document.getElementById('longSize').textContent = '$' + fmtVol(longVal);
-    document.getElementById('shortSize').textContent = '$' + fmtVol(shortVal);
+    const longVal  = (longPct  / 100) * data.oi * currentPrice;
+    const shortVal = (shortPct / 100) * data.oi * currentPrice;
+    const longUsdEl  = document.getElementById('longUsd');
+    const shortUsdEl = document.getElementById('shortUsd');
+    if (longUsdEl)  longUsdEl.textContent  = '$' + fmtVol(longVal);
+    if (shortUsdEl) shortUsdEl.textContent = '$' + fmtVol(shortVal);
   }
 
   return { longPct, shortPct, ratio };
 }
 
 function drawSparkline(prices) {
-  const canvas = document.getElementById('sparkline');
+  const canvas = document.getElementById('sparklineCanvas') || document.getElementById('sparklineCanvas');
   const ctx = canvas.getContext('2d');
   const W = canvas.offsetWidth;
   const H = 80;
@@ -1663,10 +1677,10 @@ function startSim() {
 
   document.getElementById('simStatusBadge').textContent = '● ÇALIŞIYOR';
   document.getElementById('simStatusBadge').className = 'signal-badge bull';
-  document.getElementById('simStart').textContent = '$' + amt.toLocaleString();
+  document.getElementById('simStartBtn').textContent = '$' + amt.toLocaleString();
   document.getElementById('simBalance').textContent = '$' + amt.toLocaleString();
-  document.getElementById('simResult').style.display = 'none';
-  document.getElementById('simTimerBox').style.display = 'block';
+  document.getElementById('simPnl').style.display = 'none';
+  document.getElementById('simTimer').style.display = 'block';
   document.getElementById('simStartBtn').disabled = true;
   document.getElementById('simStartBtn').style.opacity = '0.4';
   document.getElementById('tradeLog').innerHTML = '';
@@ -1694,7 +1708,7 @@ function updateSimTimer() {
     : String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
   document.getElementById('simTimer').textContent = timeStr;
   const pct = (remaining / simDurationMs) * 100;
-  document.getElementById('simTimerBar').style.width = pct + '%';
+  document.getElementById('simProgress').style.width = pct + '%';
 }
 
 function endSim() {
@@ -1720,12 +1734,12 @@ function endSim() {
   document.getElementById('simStatusBadge').textContent = 'TAMAMLANDI';
   document.getElementById('simStatusBadge').className = 'signal-badge ' + (isProfit ? 'bull' : 'bear');
   document.getElementById('simTimer').textContent = '00:00';
-  document.getElementById('simTimerBar').style.width = '0%';
+  document.getElementById('simProgress').style.width = '0%';
   document.getElementById('simStartBtn').disabled = false;
   document.getElementById('simStartBtn').style.opacity = '1';
 
   // Show result box
-  const resultEl = document.getElementById('simResult');
+  const resultEl = document.getElementById('simPnl');
   resultEl.style.display = 'block';
   resultEl.style.background = isProfit ? 'rgba(0,255,136,0.08)' : 'rgba(255,51,102,0.08)';
   resultEl.style.border = '1px solid ' + (isProfit ? 'rgba(0,255,136,0.3)' : 'rgba(255,51,102,0.3)');
@@ -1760,14 +1774,14 @@ function resetSim() {
 
   document.getElementById('simStatusBadge').textContent = 'BEKLEMEDE';
   document.getElementById('simStatusBadge').className = 'signal-badge neutral';
-  document.getElementById('simStart').textContent = '-';
+  document.getElementById('simStartBtn').textContent = '-';
   document.getElementById('simBalance').textContent = '-';
   document.getElementById('simPnl').textContent = '-';
   document.getElementById('simPnlPct').textContent = '-';
   document.getElementById('simWins').textContent = '0';
   document.getElementById('simLosses').textContent = '0';
-  document.getElementById('simTimerBox').style.display = 'none';
-  document.getElementById('simResult').style.display = 'none';
+  document.getElementById('simTimer').style.display = 'none';
+  document.getElementById('simPnl').style.display = 'none';
   document.getElementById('simStartBtn').disabled = false;
   document.getElementById('simStartBtn').style.opacity = '1';
   document.getElementById('tradeLog').innerHTML = '';
@@ -2028,7 +2042,7 @@ function addTradeLog(type, price, value, time, pnl, reason) {
 }
 
 function drawPnlChart() {
-  const canvas = document.getElementById('pnlChart');
+  const canvas = document.getElementById('pnlCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const W = canvas.offsetWidth || 300;
@@ -2839,6 +2853,7 @@ function connectWebSocket() {
 async function fullAnalysisUpdate() {
   try {
     const [ticker, klines] = await Promise.all([fetchTicker(), fetchKlines()]);
+    if (!klines || klines.length < 10) { console.warn('Klines too short:', klines?.length); setTimeout(fullAnalysisUpdate, 5000); return; }
     const closes = klines.map(k => k.close);
     const volumes = klines.map(k => k.volume);
 
@@ -2980,8 +2995,8 @@ var currentTVInterval = '15';
 function initTradingView(interval) {
   currentTVInterval = interval || '15';
   
-  document.getElementById('tradingview_chart').innerHTML = '';
-  document.getElementById('tradingview_chart').style.height = '500px';
+  document.getElementById('tradingview-container').innerHTML = '';
+  document.getElementById('tradingview-container').style.height = '500px';
   
   tvWidget = new TradingView.widget({
     autosize: true,
@@ -3031,7 +3046,7 @@ function setTVInterval(interval) {
 // Use TradingView Advanced Chart (no library needed)
 function initAdvancedChart(interval) {
   currentTVInterval = interval || '15';
-  const container = document.getElementById('tradingview_chart');
+  const container = document.getElementById('tradingview-container');
   container.innerHTML = '';
   container.style.height = '500px';
   
@@ -3099,8 +3114,8 @@ var currentTVInterval = '15';
 function initTradingView(interval) {
   currentTVInterval = interval || '15';
   
-  document.getElementById('tradingview_chart').innerHTML = '';
-  document.getElementById('tradingview_chart').style.height = '500px';
+  document.getElementById('tradingview-container').innerHTML = '';
+  document.getElementById('tradingview-container').style.height = '500px';
   
   tvWidget = new TradingView.widget({
     autosize: true,
@@ -3150,7 +3165,7 @@ function setTVInterval(interval) {
 // Use TradingView Advanced Chart (no library needed)
 function initAdvancedChart(interval) {
   currentTVInterval = interval || '15';
-  const container = document.getElementById('tradingview_chart');
+  const container = document.getElementById('tradingview-container');
   container.innerHTML = '';
   container.style.height = '500px';
   
