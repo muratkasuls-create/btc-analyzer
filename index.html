@@ -1198,6 +1198,7 @@ body::before {
 
         <button class="btn-start" id="simStartBtn" onclick="toggleSim()">▶ BAŞLAT</button>
         <button class="btn-reset" onclick="resetSim()">↺ SIFIRLA</button>
+        <div id="simResult" style="display:none;margin-top:8px;padding:10px;border-radius:8px;text-align:center"></div>
 
         <div style="margin-top:6px">
           <canvas id="pnlCanvas"></canvas>
@@ -1643,6 +1644,7 @@ async function update() {
     // Price history
     priceHistory.push(price);
     if (priceHistory.length > 50) priceHistory.shift();
+    window._change24h = parseFloat(ticker.priceChangePercent) || 0;
 
     // Closes from klines
     const closes = klines.map(k => k.close);
@@ -1875,7 +1877,7 @@ function endSim() {
   const pnlPct = (pnl / simInitial) * 100;
   const isProfit = pnl >= 0;
 
-  document.getElementById('simStatusBadge').textContent = 'TAMAMLANDI';
+  document.getElementById('simStatusBadge').textContent = isProfit ? '✓ TAMAMLANDI' : '✗ TAMAMLANDI';
   document.getElementById('simStatusBadge').className = 'signal-badge ' + (isProfit ? 'bull' : 'bear');
   document.getElementById('simTimer').textContent = '00:00';
   document.getElementById('simProgress').style.width = '0%';
@@ -1883,25 +1885,26 @@ function endSim() {
   document.getElementById('simStartBtn').disabled = false;
   document.getElementById('simStartBtn').style.opacity = '1';
 
-  // Show result box
-  const resultEl = document.getElementById('simPnl');
+  // Show result in dedicated div
+  const resultEl = document.getElementById('simResult');
   resultEl.style.display = 'block';
   resultEl.style.background = isProfit ? 'rgba(0,255,136,0.08)' : 'rgba(255,51,102,0.08)';
   resultEl.style.border = '1px solid ' + (isProfit ? 'rgba(0,255,136,0.3)' : 'rgba(255,51,102,0.3)');
-  resultEl.innerHTML = `
-    <div style="font-size:13px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:8px">${simDurationLabel} SİMÜLASYON SONUCU</div>
-    <div style="font-size:42px;font-weight:700;font-family:'Share Tech Mono',monospace;color:${isProfit ? 'var(--green)' : 'var(--red)'}">
-      ${isProfit ? '+' : ''}${pnlPct.toFixed(2)}%
+  resultEl.innerHTML = \`
+    <div style="font-size:10px;letter-spacing:2px;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:4px">\${simDurationLabel} SONUCU</div>
+    <div style="font-size:32px;font-weight:700;font-family:'Share Tech Mono',monospace;color:\${isProfit ? 'var(--green)' : 'var(--red)'}">
+      \${isProfit ? '+' : ''}\${pnlPct.toFixed(2)}%
     </div>
-    <div style="font-size:22px;font-family:'Share Tech Mono',monospace;color:${isProfit ? 'var(--green)' : 'var(--red)'}">
-      ${isProfit ? '+$' : '-$'}${Math.abs(pnl).toFixed(2)}
+    <div style="font-size:16px;font-family:'Share Tech Mono',monospace;color:\${isProfit ? 'var(--green)' : 'var(--red)'}">
+      \${isProfit ? '+$' : '-$'}\${Math.abs(pnl).toFixed(2)}
     </div>
-    <div style="margin-top:10px;font-size:13px;color:var(--dim);font-family:'Share Tech Mono',monospace">
-      $${simInitial.toLocaleString()} → $${simBalance.toFixed(2)} · ${simTradeCount} işlem
+    <div style="margin-top:6px;font-size:11px;color:var(--dim);font-family:'Share Tech Mono',monospace">
+      $\${simInitial.toLocaleString()} → $\${simBalance.toFixed(2)} · \${simTradeCount} işlem · \${simWins}W/\${simLosses}L
     </div>
-  `;
+  \`;
   updateSimUI();
 }
+
 
 function resetSim() {
   simRunning = false;
@@ -1926,7 +1929,7 @@ function resetSim() {
   document.getElementById('simWins').textContent = '0';
   document.getElementById('simLosses').textContent = '0';
   document.getElementById('simTimer').style.display = 'none';
-  document.getElementById('simPnl').style.display = 'none';
+  document.getElementById('simResult').style.display = 'none';
   document.getElementById('simStartBtn').disabled = false;
   document.getElementById('simStartBtn').style.opacity = '1';
   document.getElementById('tradeLog').innerHTML = '';
@@ -2386,7 +2389,11 @@ function renderFearGreed(val) {
 // ─── RENDER CORRELATIONS ─────────────────────────────────────────────────────
 function renderCorrelations(domValue) {
   const ph = priceHistory || [];
-  const btcChange = (ph.length >= 2 && ph[0]) ? ((ph[ph.length-1] - ph[0]) / ph[0] * 100) : 0;
+  // If history empty, retry after price comes in
+  if (ph.length < 2) {
+    setTimeout(() => renderCorrelations(domValue), 3000);
+  }
+  const btcChange = (ph.length >= 2 && ph[0]) ? ((ph[ph.length-1] - ph[0]) / ph[0] * 100) : (window._change24h || 0);
   const dxyEst = isFinite(btcChange) ? (-btcChange * 0.3) : 0;
 
   const dxyEl   = document.getElementById('dxyVal');
@@ -2921,6 +2928,7 @@ async function pollPrice() {
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('tr-TR');
     priceHistory.push(price);
     if (priceHistory.length > 50) priceHistory.shift();
+    window._change24h = parseFloat(ticker.priceChangePercent) || 0;
     drawSparkline(priceHistory);
     if (window._lastProbs) runSimStep(price, window._lastProbs.bull);
   } catch(e) { console.warn('Price poll error:', e); }
