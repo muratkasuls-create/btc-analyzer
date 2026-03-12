@@ -979,16 +979,22 @@ let prevPrice = null;
 
 // FETCH: CoinGecko + Kraken (CORS destekli)
 async function fetchTicker() {
-  const r = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin');
-  const d = await r.json();
-  const b = d[0];
-  return {
-    lastPrice: b.current_price,
-    priceChangePercent: b.price_change_percentage_24h,
-    quoteVolume: b.total_volume,
-    highPrice: b.high_24h,
-    lowPrice: b.low_24h,
-  };
+  // Try Binance directly first (has CORS headers)
+  const apis = [
+    () => fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT')
+           .then(r=>r.json())
+           .then(d=>({ lastPrice: parseFloat(d.lastPrice), priceChangePercent: parseFloat(d.priceChangePercent), quoteVolume: parseFloat(d.quoteVolume), highPrice: parseFloat(d.highPrice), lowPrice: parseFloat(d.lowPrice) })),
+    () => fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin'))
+           .then(r=>r.json())
+           .then(d=>({ lastPrice: d[0].current_price, priceChangePercent: d[0].price_change_percentage_24h, quoteVolume: d[0].total_volume, highPrice: d[0].high_24h, lowPrice: d[0].low_24h })),
+    () => fetch('https://api.kraken.com/0/public/Ticker?pair=XBTUSD')
+           .then(r=>r.json())
+           .then(d=>{ const t=d.result.XXBTZUSD; return { lastPrice: parseFloat(t.c[0]), priceChangePercent: ((parseFloat(t.c[0])-parseFloat(t.o))/parseFloat(t.o)*100), quoteVolume: parseFloat(t.v[1])*parseFloat(t.c[0]), highPrice: parseFloat(t.h[1]), lowPrice: parseFloat(t.l[1]) }; }),
+  ];
+  for (const api of apis) {
+    try { return await api(); } catch(e) { continue; }
+  }
+  throw new Error('Tüm ticker API'leri başarısız');
 }
 
 async function fetchOrderBook() {
@@ -2438,7 +2444,7 @@ async function fullAnalysisUpdate() {
   } catch(err) {
     console.error('Analysis update error:', err);
   }
-  setTimeout(fullAnalysisUpdate, 15000);
+  setTimeout(fullAnalysisUpdate, 30000);
 }
 
 // Fallback polling
